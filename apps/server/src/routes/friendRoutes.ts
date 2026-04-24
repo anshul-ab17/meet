@@ -51,6 +51,25 @@ router.post("/accept/:requesterId", async (req, res) => {
   res.json(result);
 });
 
+// Reject an incoming friend request
+router.delete("/request/:requesterId", async (req, res) => {
+  const parsed = userIdParam.safeParse(req.params["requesterId"]);
+  if (!parsed.success) { res.status(400).json({ error: "invalid requesterId" }); return; }
+  const user = res.locals["user"] as { id: string };
+  await friendService.rejectRequest(parsed.data, user.id);
+  res.status(204).end();
+});
+
+// Cancel a sent friend request
+router.delete("/request/sent/:targetId", async (req, res) => {
+  const parsed = userIdParam.safeParse(req.params["targetId"]);
+  if (!parsed.success) { res.status(400).json({ error: "invalid targetId" }); return; }
+  const user = res.locals["user"] as { id: string };
+  await friendService.cancelRequest(user.id, parsed.data);
+  res.status(204).end();
+});
+
+// Remove a friend
 router.delete("/:friendId", async (req, res) => {
   const parsed = userIdParam.safeParse(req.params["friendId"]);
   if (!parsed.success) {

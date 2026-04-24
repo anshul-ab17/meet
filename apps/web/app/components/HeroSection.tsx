@@ -21,12 +21,15 @@ export function HeroSection() {
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-10 py-6 border-b border-white/[0.05] backdrop-blur-xl sticky top-0 z-50">
-        <div className="flex items-center gap-3">
+        <button 
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center shadow-lg shadow-primary/20">
             <MessageSquare size={20} className="text-white" />
           </div>
           <span className="text-white font-sans text-xl font-bold tracking-tight">MEET</span>
-        </div>
+        </button>
         <div className="flex gap-4 items-center">
           <AuthModal defaultMode="signin">
             <Button variant="ghost" className="text-gray-400 hover:text-white transition-colors">Log In</Button>

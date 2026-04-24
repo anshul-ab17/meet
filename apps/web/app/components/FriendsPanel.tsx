@@ -49,8 +49,13 @@ export function FriendsPanel({ token, onOpenDM, onStartCall, onRefresh }: Friend
   };
 
   const handleReject = async (requesterId: string) => {
-    await fetch(`${API_URL}/friends/${requesterId}`, { method: "DELETE", headers: authHeaders });
+    await fetch(`${API_URL}/friends/request/${requesterId}`, { method: "DELETE", headers: authHeaders });
     removePendingIn(requesterId);
+  };
+
+  const handleCancelRequest = async (targetId: string) => {
+    await fetch(`${API_URL}/friends/request/sent/${targetId}`, { method: "DELETE", headers: authHeaders });
+    removePendingOut(targetId);
   };
 
   const handleRemoveFriend = async (friendId: string) => {

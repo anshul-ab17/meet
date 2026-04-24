@@ -47,12 +47,15 @@ export function Sidebar({ onCreateChannel, onOpenDM }: SidebarProps) {
       <div className="absolute top-0 left-0 w-full h-32 bg-primary/5 blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="h-16 flex items-center px-6 gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center shadow-lg shadow-primary/10">
+      <button 
+        onClick={() => globalRoom && selectRoom(globalRoom, "global")}
+        className="h-16 flex items-center px-6 gap-3 shrink-0 hover:bg-white/[0.02] transition-all duration-300 group text-left w-full border-b border-white/[0.04]"
+      >
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center shadow-lg shadow-primary/10 group-hover:scale-105 transition-transform">
           <MessageSquare size={16} className="text-white" />
         </div>
         <span className="font-bold text-white text-base tracking-tight">Meet</span>
-      </div>
+      </button>
 
       <div className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1 custom-scrollbar">
         {/* Global */}
@@ -170,7 +173,7 @@ export function Sidebar({ onCreateChannel, onOpenDM }: SidebarProps) {
         >
           <div className="flex items-center gap-3">
             <Users size={16} className={`shrink-0 ${activeSection === "friends" ? "text-primary" : "text-gray-500 group-hover:text-gray-300"}`} />
-            <span className="font-medium">Friends Hub</span>
+            <span className="font-medium">Friends</span>
           </div>
           <Badge count={pendingIn.length} className="bg-primary/20 text-primary" />
         </button>
