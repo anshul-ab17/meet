@@ -54,15 +54,32 @@ export function AuthModal({ children, defaultMode = "signup" }: AuthModalProps) 
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
-        <div className="flex gap-1 mb-6 bg-bg-base rounded-lg p-1">
+        {/* Header */}
+        <div className="mb-6">
+          <h2 className="text-white font-bold text-xl tracking-tight mb-1">
+            {mode === "signup" ? "Create your account" : "Welcome back"}
+          </h2>
+          <p className="text-gray-500 text-sm">
+            {mode === "signup" ? "Start chatting in seconds." : "Sign in to continue."}
+          </p>
+        </div>
+
+        {/* Tab switcher */}
+        <div className="flex mb-5 border-b border-white/[0.07]">
           {(["signup", "signin"] as Mode[]).map((m) => (
             <button
               key={m}
               onClick={() => { setMode(m); setError(""); }}
-              className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors capitalize ${mode === m ? "bg-primary text-white" : "text-gray-400 hover:text-gray-200"
-                }`}
+              className={`flex-1 pb-3 text-sm font-semibold transition-all duration-200 relative ${
+                mode === m
+                  ? "text-white"
+                  : "text-gray-500 hover:text-gray-300"
+              }`}
             >
-              {m === "signup" ? "Sign In" : "Sign Up"}
+              {m === "signup" ? "Sign Up" : "Sign In"}
+              {mode === m && (
+                <span className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-primary rounded-full" />
+              )}
             </button>
           ))}
         </div>
@@ -80,14 +97,26 @@ export function AuthModal({ children, defaultMode = "signup" }: AuthModalProps) 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && (
+            <div className="flex items-center gap-2 text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
+              {error}
+            </div>
+          )}
           <Button
             type="submit"
             disabled={loading || !name.trim() || !password}
-            className="w-full mt-1"
+            className="w-full mt-2 shadow-glow-sm hover:shadow-glow-md transition-all duration-300 font-semibold"
             size="lg"
           >
-            {loading ? "..." : mode === "signup" ? "Sign In" : "Create Account"}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                {mode === "signup" ? "Creating..." : "Signing in..."}
+              </span>
+            ) : (
+              mode === "signup" ? "Create Account" : "Sign In"
+            )}
           </Button>
         </form>
       </DialogContent>

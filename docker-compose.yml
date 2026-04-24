@@ -3,11 +3,11 @@ version: "3.8"
 services:
   neo4j:
     image: neo4j:5
-    container_name: enlazar-neo4j
+    container_name: meet-neo4j
     restart: always
     ports:
-      - "7474:7474"   # browser UI
-      - "7687:7687"   # bolt protocol (driver use karega)
+      - "7474:7474"
+      - "7687:7687"
     environment:
       - NEO4J_AUTH=neo4j/password
       - NEO4J_dbms_security_auth__enabled=true

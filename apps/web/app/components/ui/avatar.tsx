@@ -1,12 +1,11 @@
 import { cn } from "../../lib/utils";
 
 const COLORS = [
-  "bg-[#800020]",
-  "bg-[#1a6b5a]",
-  "bg-[#1a4d80]",
-  "bg-[#6b1a6b]",
-  "bg-[#7a5c00]",
-  "bg-[#4a1a1a]",
+  "bg-primary",
+  "bg-zinc-800",
+  "bg-zinc-900",
+  "bg-[#4a0012]",
+  "bg-[#2d000b]",
 ];
 
 function hashColor(name: string) {
@@ -21,19 +20,23 @@ interface AvatarProps {
   className?: string;
 }
 
-const sizes = { sm: "w-7 h-7 text-xs", md: "w-9 h-9 text-sm", lg: "w-12 h-12 text-base" };
+const sizes = { sm: "w-8 h-8 text-[10px]", md: "w-10 h-10 text-xs", lg: "w-14 h-14 text-sm" };
 
 export function Avatar({ name, size = "md", className }: AvatarProps) {
   return (
     <div
       className={cn(
-        "rounded-full shrink-0 flex items-center justify-center text-white font-semibold uppercase",
+        "rounded-xl shrink-0 flex items-center justify-center text-white font-black uppercase tracking-tighter shadow-inner",
         sizes[size],
         hashColor(name),
         className
       )}
+      style={{
+        boxShadow: "inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 6px -1px rgba(0,0,0,0.2)",
+      }}
     >
-      {name.slice(0, 1)}
+      {name.slice(0, 2)}
     </div>
   );
 }
+

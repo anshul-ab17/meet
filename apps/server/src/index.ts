@@ -1,6 +1,13 @@
 import "dotenv/config";
 import { createServer } from "http";
 import express, { type RequestHandler } from "express";
+
+process.on("uncaughtException", (err) => {
+  console.error("[uncaughtException]", err);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("[unhandledRejection]", reason);
+});
 import cors from "cors";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";

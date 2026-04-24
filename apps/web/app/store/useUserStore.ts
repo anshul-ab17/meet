@@ -19,6 +19,6 @@ export const useUserStore = create<UserState>()(
       setSession: (user, token) => set({ user, token }),
       clearUser: () => set({ user: null, token: null }),
     }),
-    { name: "enlazar_user" }
+    { name: "meet_user" }
   )
 );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, Hash, Users, Plus, LogOut, ChevronDown, ChevronRight, Settings } from "lucide-react";
+import { Globe, Hash, Users, Plus, LogOut, ChevronDown, ChevronRight, Settings, MessageSquare } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useFriendStore } from "../store/useFriendStore";
 import { useUserStore } from "../store/useUserStore";
@@ -42,161 +42,173 @@ export function Sidebar({ onCreateChannel, onOpenDM }: SidebarProps) {
   const activeDMParticipantId = activeSection === "dm" ? currentRoom?.participantId : undefined;
 
   return (
-    <div className="w-60 bg-bg-sidebar flex flex-col shrink-0 border-r border-border-subtle">
+    <div className="w-64 bg-bg-sidebar flex flex-col shrink-0 relative overflow-hidden font-sans">
+      {/* Background Subtle Glow */}
+      <div className="absolute top-0 left-0 w-full h-32 bg-primary/5 blur-3xl pointer-events-none" />
+
       {/* Header */}
-      <div className="h-12 flex items-center px-4 border-b border-border-subtle">
-        <span className="font-bold text-white text-sm tracking-tight">Meet</span>
+      <div className="h-16 flex items-center px-6 gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center shadow-lg shadow-primary/10">
+          <MessageSquare size={16} className="text-white" />
+        </div>
+        <span className="font-bold text-white text-base tracking-tight">Meet</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-0.5">
+      <div className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1 custom-scrollbar">
         {/* Global */}
         {globalRoom && (
           <button
             onClick={() => selectRoom(globalRoom, "global")}
-            className={`w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${
+            className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group relative ${
               activeSection === "global"
-                ? "bg-bg-input text-white"
-                : "text-gray-400 hover:bg-bg-input hover:text-gray-200"
+                ? "bg-primary/10 text-white before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-4 before:bg-primary before:rounded-r-full"
+                : "text-gray-400 hover:bg-white/[0.04] hover:text-gray-200"
             }`}
           >
-            <Globe size={15} className="shrink-0 text-gray-400" />
-            <span className="truncate">global</span>
+            <Globe size={16} className={`shrink-0 transition-colors ${activeSection === "global" ? "text-primary" : "text-gray-500 group-hover:text-gray-300"}`} />
+            <span className="font-medium truncate">Global Discovery</span>
           </button>
         )}
 
         {/* Channels */}
-        <div className="mt-3">
-          <div className="flex items-center justify-between px-2 mb-1 group">
+        <div className="mt-6">
+          <div className="flex items-center justify-between px-3 mb-2 group">
             <button
               onClick={() => setChannelsOpen((v) => !v)}
-              className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-300 transition-colors"
+              className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.1em] hover:text-gray-300 transition-colors"
             >
-              {channelsOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+              {channelsOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
               Channels
             </button>
             <CreateChannelModal onCreate={onCreateChannel}>
               <button
                 title="Create Channel"
-                className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-200 transition-colors rounded"
+                className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center text-gray-500 hover:text-primary transition-all rounded-lg hover:bg-primary/10"
               >
-                <Plus size={13} />
+                <Plus size={14} />
               </button>
             </CreateChannelModal>
           </div>
 
           {channelsOpen && channels.length === 0 && (
-            <p className="px-3 py-1 text-xs text-gray-600 italic">No channels yet</p>
+            <p className="px-3 py-1 text-xs text-gray-600 italic font-light">No channels created</p>
           )}
 
-          {channelsOpen &&
-            channels.map((room) => {
-              const isActive = currentRoom?.chatId === room.chatId && activeSection === "channel";
-              return (
-                <button
-                  key={room.chatId}
-                  onClick={() => selectRoom(room, "channel")}
-                  className={`w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${
-                    isActive
-                      ? "bg-bg-input text-white"
-                      : "text-gray-400 hover:bg-bg-input hover:text-gray-200"
-                  }`}
-                >
-                  <Hash size={14} className={`shrink-0 ${isActive ? "text-gray-300" : "text-gray-500"}`} />
-                  <span className="truncate">{room.name}</span>
-                </button>
-              );
-            })}
+          <div className="flex flex-col gap-0.5">
+            {channelsOpen &&
+              channels.map((room) => {
+                const isActive = currentRoom?.chatId === room.chatId && activeSection === "channel";
+                return (
+                  <button
+                    key={room.chatId}
+                    onClick={() => selectRoom(room, "channel")}
+                    className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group relative ${
+                      isActive
+                        ? "bg-primary/10 text-white before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-4 before:bg-primary before:rounded-r-full"
+                        : "text-gray-500 hover:bg-white/[0.04] hover:text-gray-200"
+                    }`}
+                  >
+                    <Hash size={16} className={`shrink-0 transition-colors ${isActive ? "text-primary" : "text-gray-600 group-hover:text-gray-400"}`} />
+                    <span className={`truncate ${isActive ? "font-semibold" : "font-medium"}`}>{room.name}</span>
+                  </button>
+                );
+              })}
+          </div>
         </div>
 
-        {/* Direct Messages — driven by friends list */}
-        <div className="mt-3">
-          <div className="flex items-center justify-between px-2 mb-1">
+        {/* Direct Messages */}
+        <div className="mt-6">
+          <div className="flex items-center justify-between px-3 mb-2">
             <button
               onClick={() => setDmsOpen((v) => !v)}
-              className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-300 transition-colors"
+              className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.1em] hover:text-gray-300 transition-colors"
             >
-              {dmsOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+              {dmsOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
               Direct Messages
             </button>
           </div>
 
           {dmsOpen && friends.length === 0 && (
-            <p className="px-3 py-1 text-xs text-gray-600 italic">Add friends to message them</p>
+            <p className="px-3 py-1 text-xs text-gray-600 italic font-light">Start a conversation</p>
           )}
 
-          {dmsOpen &&
-            friends.map((friend) => {
-              const isActive = activeDMParticipantId === friend.id;
-              return (
-                <button
-                  key={friend.id}
-                  onClick={() => handleFriendDM(friend.id, friend.name)}
-                  className={`w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${
-                    isActive
-                      ? "bg-bg-input text-white"
-                      : "text-gray-400 hover:bg-bg-input hover:text-gray-200"
-                  }`}
-                >
-                  <div className="relative shrink-0">
-                    <Avatar name={friend.name} size="sm" />
-                    <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-bg-sidebar" />
-                  </div>
-                  <span className={`truncate ${isActive ? "text-white font-medium" : ""}`}>
-                    {friend.name}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="flex flex-col gap-0.5">
+            {dmsOpen &&
+              friends.map((friend) => {
+                const isActive = activeDMParticipantId === friend.id;
+                return (
+                  <button
+                    key={friend.id}
+                    onClick={() => handleFriendDM(friend.id, friend.name)}
+                    className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group relative ${
+                      isActive
+                        ? "bg-primary/10 text-white before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-4 before:bg-primary before:rounded-r-full"
+                        : "text-gray-500 hover:bg-white/[0.04] hover:text-gray-200"
+                    }`}
+                  >
+                    <div className="relative shrink-0">
+                      <Avatar name={friend.name} size="sm" />
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-[3px] border-bg-sidebar" />
+                    </div>
+                    <span className={`truncate ${isActive ? "text-white font-semibold" : "font-medium"}`}>
+                      {friend.name}
+                    </span>
+                  </button>
+                );
+              })}
+          </div>
         </div>
 
         {/* Friends */}
         <button
           onClick={() => setActiveSection("friends")}
-          className={`mt-3 w-full text-left flex items-center justify-between gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${
+          className={`mt-6 w-full text-left flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group relative ${
             activeSection === "friends"
-              ? "bg-bg-input text-white"
-              : "text-gray-400 hover:bg-bg-input hover:text-gray-200"
+              ? "bg-primary/10 text-white before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-4 before:bg-primary before:rounded-r-full"
+              : "text-gray-500 hover:bg-white/[0.04] hover:text-gray-200"
           }`}
         >
-          <div className="flex items-center gap-2">
-            <Users size={15} className="shrink-0" />
-            <span>Friends</span>
+          <div className="flex items-center gap-3">
+            <Users size={16} className={`shrink-0 ${activeSection === "friends" ? "text-primary" : "text-gray-500 group-hover:text-gray-300"}`} />
+            <span className="font-medium">Friends Hub</span>
           </div>
-          <Badge count={pendingIn.length} />
+          <Badge count={pendingIn.length} className="bg-primary/20 text-primary" />
         </button>
       </div>
 
+
       {/* User section */}
-      <div className="h-14 px-3 flex items-center justify-between border-t border-border-subtle bg-bg-server">
+      <div className="px-4 py-4 shrink-0 bg-white/[0.02] backdrop-blur-md border-t border-white/[0.05]">
         {user && (
-          <>
-            <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3 min-w-0">
               <div className="relative shrink-0">
-                <Avatar name={user.name} size="sm" />
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-bg-server" />
+                <Avatar name={user.name} size="sm" className="ring-2 ring-primary/20" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-[3px] border-bg-sidebar shadow-sm" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-white text-xs font-semibold truncate leading-tight">{user.name}</span>
-                <span className="text-green-400 text-[10px] leading-tight">Online</span>
+                <span className="text-white text-[13px] font-bold truncate leading-tight">{user.name}</span>
+                <span className="text-primary text-[10px] font-black uppercase tracking-widest leading-tight">Online</span>
               </div>
             </div>
             <div className="flex gap-1 shrink-0">
               <EditProfileModal>
-                <Tooltip label="Edit Profile">
-                  <Button variant="ghost" size="icon">
-                    <Settings size={15} />
+                <Tooltip label="Settings">
+                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white">
+                    <Settings size={14} />
                   </Button>
                 </Tooltip>
               </EditProfileModal>
               <Tooltip label="Sign Out">
-                <Button variant="ghost" size="icon" onClick={clearUser}>
-                  <LogOut size={15} />
+                <Button variant="ghost" size="icon" onClick={clearUser} className="w-8 h-8 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400">
+                  <LogOut size={14} />
                 </Button>
               </Tooltip>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
   );
 }
+

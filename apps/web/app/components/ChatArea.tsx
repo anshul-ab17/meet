@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { Send, Phone, Video, UserPlus } from "lucide-react";
+import { Send, Phone, Video, UserPlus, Hash, MoreHorizontal, Smile, Plus } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useUserStore } from "../store/useUserStore";
 import { Avatar } from "./ui/avatar";
@@ -56,68 +56,62 @@ export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOp
   if (!room) return null;
 
   return (
-    <div className="flex-1 flex flex-col min-w-0">
+    <div className="flex-1 flex flex-col min-w-0 bg-bg-base relative">
+      {/* Background Subtle Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+
       {/* Header */}
-      <div className="h-12 flex items-center justify-between px-4 border-b border-border-subtle shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-gray-500 text-sm">{prefix}</span>
-          <span className="font-semibold text-white text-sm">{room.name}</span>
+      <header className="h-16 flex items-center justify-between px-6 bg-bg-base/60 backdrop-blur-xl border-b border-white/[0.05] z-10 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="text-primary font-bold text-xl opacity-50">{prefix}</div>
+          <h2 className="font-bold text-white text-base tracking-tight">{room.name}</h2>
+          {isChannel && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse ml-1" />}
         </div>
 
-        <div className="flex gap-1">
-          {/* DM call buttons */}
+        <div className="flex items-center gap-2">
           {onStartCall && isDM && (
-            <>
+            <div className="flex gap-1 mr-2">
               <Tooltip label="Voice Call">
-                <Button variant="ghost" size="icon" onClick={() => onStartCall("audio")}>
-                  <Phone size={16} />
+                <Button variant="ghost" size="icon" onClick={() => onStartCall("audio")} className="w-9 h-9 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl">
+                  <Phone size={18} />
                 </Button>
               </Tooltip>
               <Tooltip label="Video Call">
-                <Button variant="ghost" size="icon" onClick={() => onStartCall("video")}>
-                  <Video size={16} />
+                <Button variant="ghost" size="icon" onClick={() => onStartCall("video")} className="w-9 h-9 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl">
+                  <Video size={18} />
                 </Button>
               </Tooltip>
-            </>
+            </div>
           )}
 
-          {/* Channel: call & invite */}
-          {isChannel && (
-            <>
-              <Tooltip label="Voice Call (select a member)">
-                <Button variant="ghost" size="icon" disabled>
-                  <Phone size={16} />
+          {isChannel && token && (
+            <InviteToChannelModal chatId={room.chatId} channelName={room.name} token={token}>
+              <Tooltip label="Invite Friends">
+                <Button variant="ghost" size="icon" className="w-9 h-9 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl mr-2">
+                  <UserPlus size={18} />
                 </Button>
               </Tooltip>
-              <Tooltip label="Video Call (select a member)">
-                <Button variant="ghost" size="icon" disabled>
-                  <Video size={16} />
-                </Button>
-              </Tooltip>
-              {token && (
-                <InviteToChannelModal chatId={room.chatId} channelName={room.name} token={token}>
-                  <Tooltip label="Invite to Channel">
-                    <Button variant="ghost" size="icon">
-                      <UserPlus size={16} />
-                    </Button>
-                  </Tooltip>
-                </InviteToChannelModal>
-              )}
-            </>
+            </InviteToChannelModal>
           )}
+          
+          <Button variant="ghost" size="icon" className="w-9 h-9 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl">
+            <MoreHorizontal size={18} />
+          </Button>
         </div>
-      </div>
+      </header>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-0.5">
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-1 custom-scrollbar relative z-0">
         {messages.length === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-center text-gray-600 py-20">
-            <p className="text-4xl mb-2">{isDM ? "💬" : "#"}</p>
-            <p className="font-semibold text-gray-400">
-              {isDM ? "Start a conversation" : `Welcome to #${room.name}`}
-            </p>
-            <p className="text-sm mt-1">
-              {isDM ? "Send a message to get started." : "This is the beginning of this channel."}
+          <div className="flex-1 flex flex-col items-center justify-center text-center max-w-sm mx-auto py-20">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-5">
+              {isDM ? <Smile size={32} /> : <Hash size={32} />}
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">
+              {isDM ? `This is the start of your journey with ${room.name}` : `Welcome to the ${room.name} hub`}
+            </h3>
+            <p className="text-gray-500 text-sm font-light leading-relaxed">
+              {isDM ? "Send a message to break the ice and start connecting." : "Share ideas, collaborate, and keep the conversation flowing in this channel."}
             </p>
           </div>
         )}
@@ -131,7 +125,6 @@ export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOp
             ? msg.content.toLowerCase().includes(`@${user.name.toLowerCase()}`)
             : false;
 
-          // Render content with highlighted @mention
           const renderContent = () => {
             if (!user || !hasMention) return <span>{msg.content}</span>;
             const parts = msg.content.split(new RegExp(`(@${user.name})`, "gi"));
@@ -139,7 +132,7 @@ export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOp
               <>
                 {parts.map((part, idx) =>
                   part.toLowerCase() === `@${user.name.toLowerCase()}` ? (
-                    <span key={idx} className="text-yellow-400 font-medium bg-yellow-400/10 rounded px-0.5">
+                    <span key={idx} className="text-primary font-bold bg-primary/10 rounded px-1">
                       {part}
                     </span>
                   ) : (
@@ -153,91 +146,103 @@ export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOp
           return (
             <div
               key={msg.id ?? i}
-              className={`flex gap-3 ${grouped ? "mt-0.5" : "mt-3"} group ${
-                hasMention ? "bg-yellow-500/5 -mx-2 px-2 rounded" : ""
+              className={`flex flex-col ${grouped ? "mt-0.5" : "mt-6"} group ${
+                hasMention ? "bg-primary/5 -mx-4 px-4 py-1 rounded-2xl" : ""
               }`}
             >
-              {!grouped ? (
-                <button
-                  onClick={() => clickable && setProfileUser({ id: msg.userId, name: msg.userName ?? msg.userId })}
-                  className={clickable ? "cursor-pointer hover:opacity-80 transition-opacity shrink-0" : "shrink-0 cursor-default"}
-                >
-                  <Avatar name={msg.userName ?? msg.userId} />
-                </button>
-              ) : (
-                <div className="w-9 shrink-0" />
-              )}
-
-              <div className="flex flex-col min-w-0 flex-1">
-                {!grouped && (
-                  <div className="flex items-baseline gap-2 mb-0.5">
-                    <button
-                      onClick={() => clickable && setProfileUser({ id: msg.userId, name: msg.userName ?? msg.userId })}
-                      className={`text-sm font-semibold transition-colors ${
-                        isOwn
-                          ? "text-primary cursor-default"
-                          : "text-gray-200 hover:text-white cursor-pointer"
-                      }`}
-                    >
-                      {msg.userName ?? msg.userId}
-                    </button>
-                    <span className="text-xs text-gray-600">{formatTime(msg.createdAt)}</span>
-                  </div>
-                )}
-                <p className="text-sm text-gray-300 break-words">{renderContent()}</p>
-              </div>
-
-              {/* Quick action buttons on hover — global/channel only */}
-              {!isDM && !isOwn && (
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 items-start pt-0.5">
-                  <Tooltip label="Voice Call">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-6 h-6"
-                      onClick={() => onStartCallWithUser?.(msg.userId, msg.userName ?? msg.userId, "audio")}
-                    >
-                      <Phone size={12} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label="Video Call">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-6 h-6"
-                      onClick={() => onStartCallWithUser?.(msg.userId, msg.userName ?? msg.userId, "video")}
-                    >
-                      <Video size={12} />
-                    </Button>
-                  </Tooltip>
+              {!grouped && (
+                <div className={`flex items-baseline gap-3 mb-1.5 ${isOwn ? "flex-row-reverse px-2" : "px-2"}`}>
+                  <button
+                    onClick={() => clickable && setProfileUser({ id: msg.userId, name: msg.userName ?? msg.userId })}
+                    className={`text-[13px] font-bold transition-colors ${
+                      isOwn ? "text-primary hover:text-primary-hover" : "text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    {msg.userName ?? msg.userId}
+                  </button>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">
+                    {formatTime(msg.createdAt)}
+                  </span>
                 </div>
               )}
+
+              <div className={`flex items-end gap-3 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+                {!grouped ? (
+                  <button
+                    onClick={() => clickable && setProfileUser({ id: msg.userId, name: msg.userName ?? msg.userId })}
+                    className={`shrink-0 transition-all duration-300 ${clickable ? "hover:scale-110 active:scale-95" : "cursor-default"}`}
+                  >
+                    <Avatar name={msg.userName ?? msg.userId} size="sm" className={`ring-2 ${isOwn ? "ring-primary/20" : "ring-white/5"}`} />
+                  </button>
+                ) : (
+                  <div className="w-8 shrink-0" />
+                )}
+
+                <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 group-hover:shadow-md ${
+                  isOwn 
+                    ? "bg-primary text-white rounded-br-none" 
+                    : "bg-bg-input text-gray-200 rounded-bl-none group-hover:bg-white/[0.08]"
+                }`}>
+                  {renderContent()}
+                </div>
+
+                {!isDM && !isOwn && !grouped && (
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+                    <Tooltip label="Call">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-lg bg-white/5 hover:bg-primary/10 text-gray-500 hover:text-primary"
+                        onClick={() => onStartCallWithUser?.(msg.userId, msg.userName ?? msg.userId, "audio")}
+                      >
+                        <Phone size={14} />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
-        <div ref={bottomRef} />
+        <div ref={bottomRef} className="h-4" />
       </div>
 
-      {/* Input */}
-      <div className="px-4 pb-4 shrink-0">
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-bg-input rounded-lg px-4 pr-2 py-1">
+      {/* Input Area */}
+      <footer className="px-6 pb-6 pt-2 bg-gradient-to-t from-bg-base to-transparent z-10 shrink-0">
+        <form 
+          onSubmit={handleSubmit} 
+          className="flex items-center gap-3 bg-bg-input/80 backdrop-blur-md border border-white/[0.05] rounded-2xl px-4 py-2 shadow-xl focus-within:border-primary/30 focus-within:bg-bg-input transition-all duration-300"
+        >
+          <Button type="button" variant="ghost" size="icon" className="shrink-0 text-gray-500 hover:text-gray-300 w-9 h-9">
+            <Plus size={20} />
+          </Button>
+          
           <input
-            className="flex-1 bg-transparent py-2.5 text-white text-sm outline-none placeholder-gray-500"
+            className="flex-1 bg-transparent py-2 text-white text-sm outline-none placeholder-gray-600 font-light"
             placeholder={`Message ${prefix}${room.name}`}
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <Button
-            type="submit"
-            size="icon"
-            disabled={!input.trim()}
-            variant="ghost"
-            className="shrink-0 text-gray-400 hover:text-primary"
-          >
-            <Send size={16} />
-          </Button>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <Button type="button" variant="ghost" size="icon" className="text-gray-500 hover:text-gray-300 w-9 h-9">
+              <Smile size={20} />
+            </Button>
+            <Button
+              type="submit"
+              size="icon"
+              disabled={!input.trim()}
+              className={`shrink-0 w-9 h-9 rounded-xl transition-all duration-300 ${
+                input.trim()
+                  ? "bg-primary text-white shadow-glow-sm scale-100"
+                  : "bg-transparent text-gray-600 scale-90 opacity-50"
+              }`}
+            >
+              <Send size={18} />
+            </Button>
+          </div>
         </form>
-      </div>
+      </footer>
 
       {/* Profile modal */}
       {profileUser && (
@@ -253,3 +258,4 @@ export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOp
     </div>
   );
 }
+
