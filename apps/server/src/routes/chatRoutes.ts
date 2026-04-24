@@ -1,6 +1,7 @@
 import { Router, type Router as ExpressRouter } from "express";
 import { ChatService } from "@repo/db";
 import { z } from "zod";
+import { roomManager } from "../ws/roomManager.js";
 
 const router: ExpressRouter = Router();
 const chatService = new ChatService();
@@ -27,6 +28,7 @@ router.post("/channels", async (req, res) => {
     return;
   }
   const room = await chatService.createChannel(parsed.data.name);
+  roomManager.broadcastAll({ type: "channel-created", channel: room });
   res.json(room);
 });
 

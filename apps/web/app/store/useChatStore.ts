@@ -14,6 +14,7 @@ interface ChatState {
   activeSection: ActiveSection;
   setGlobalRoom: (room: Room) => void;
   setChannels: (rooms: Room[]) => void;
+  addChannel: (room: Room) => void;
   setDMs: (rooms: Room[]) => void;
   addDM: (room: Room) => void;
   setCurrentRoom: (room: Room | null) => void;
@@ -31,6 +32,7 @@ export const useChatStore = create<ChatState>()((set) => ({
   activeSection: "global",
   setGlobalRoom: (room) => set({ globalRoom: room }),
   setChannels: (channels) => set({ channels }),
+  addChannel: (room) => set((s) => ({ channels: s.channels.some(c => c.chatId === room.chatId) ? s.channels : [...s.channels, room] })),
   setDMs: (dms) => set({ dms }),
   addDM: (room) => set((s) => ({ dms: [...s.dms.filter((d) => d.chatId !== room.chatId), room] })),
   setCurrentRoom: (room) => set({ currentRoom: room, messages: [] }),

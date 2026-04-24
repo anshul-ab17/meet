@@ -1,6 +1,7 @@
 import { Router, type Router as ExpressRouter } from "express";
 import { FriendService } from "@repo/db";
 import { z } from "zod";
+import { roomManager } from "../ws/roomManager.js";
 
 const router: ExpressRouter = Router();
 const friendService = new FriendService();
@@ -26,28 +27,21 @@ router.get("/requests/sent", async (req, res) => {
 });
 
 router.post("/request/:targetId", async (req, res) => {
-  const parsed = userIdParam.safeParse(req.params["targetId"]);
-  if (!parsed.success) {
-    res.status(400).json({ error: "invalid targetId" });
-    return;
-  }
   const user = res.locals["user"] as { id: string };
-  if (user.id === parsed.data) {
-    res.status(400).json({ error: "cannot send request to yourself" });
-    return;
-  }
+  const parsed = userIdParam.safeParse(req.params["targetId"]);
+  if (!parsed.success) { res.status(400).json({ error: "invalid targetId" }); return; }
+  if (user.id === parsed.data) { res.status(400).json({ error: "cannot send request to yourself" }); return; }
   const result = await friendService.sendRequest(user.id, parsed.data);
+  roomManager.sendToUser(parsed.data, { type: "friend-update" });
   res.json(result);
 });
 
 router.post("/accept/:requesterId", async (req, res) => {
-  const parsed = userIdParam.safeParse(req.params["requesterId"]);
-  if (!parsed.success) {
-    res.status(400).json({ error: "invalid requesterId" });
-    return;
-  }
   const user = res.locals["user"] as { id: string };
+  const parsed = userIdParam.safeParse(req.params["requesterId"]);
+  if (!parsed.success) { res.status(400).json({ error: "invalid requesterId" }); return; }
   const result = await friendService.acceptRequest(parsed.data, user.id);
+  roomManager.sendToUser(parsed.data, { type: "friend-update" });
   res.json(result);
 });
 

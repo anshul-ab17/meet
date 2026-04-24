@@ -32,12 +32,24 @@ export default function Home() {
   const addNotification = useNotificationStore((s) => s.add);
   const prevPendingInCountRef = useRef(0);
 
-  const { send, joinRoom } = useWS(token, user?.name);
-
   const authHeaders = useCallback(
     () => ({ Authorization: `Bearer ${token}`, "Content-Type": "application/json" }),
     [token]
   );
+
+  const loadFriends = useCallback(async () => {
+    const h = authHeaders();
+    const [friends, pendingIn, pendingOut] = await Promise.all([
+      fetch(`${API_URL}/friends`, { headers: h }).then((r) => r.json()),
+      fetch(`${API_URL}/friends/requests`, { headers: h }).then((r) => r.json()),
+      fetch(`${API_URL}/friends/requests/sent`, { headers: h }).then((r) => r.json()),
+    ]);
+    setFriends(friends as Friend[]);
+    setPendingIn(pendingIn as Friend[]);
+    setPendingOut(pendingOut as Friend[]);
+  }, [authHeaders]);
+
+  const { send, joinRoom } = useWS(token, user?.name, loadFriends);
 
   // Load initial data
   useEffect(() => {
@@ -62,18 +74,6 @@ export default function Home() {
     }
     prevPendingInCountRef.current = pendingIn.length;
   }, [pendingIn.length]);
-
-  const loadFriends = useCallback(async () => {
-    const h = authHeaders();
-    const [friends, pendingIn, pendingOut] = await Promise.all([
-      fetch(`${API_URL}/friends`, { headers: h }).then((r) => r.json()),
-      fetch(`${API_URL}/friends/requests`, { headers: h }).then((r) => r.json()),
-      fetch(`${API_URL}/friends/requests/sent`, { headers: h }).then((r) => r.json()),
-    ]);
-    setFriends(friends as Friend[]);
-    setPendingIn(pendingIn as Friend[]);
-    setPendingOut(pendingOut as Friend[]);
-  }, [authHeaders]);
 
   // Join room + load history whenever the room changes
   useEffect(() => {

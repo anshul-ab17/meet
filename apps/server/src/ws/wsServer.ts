@@ -1,12 +1,11 @@
 import { WebSocketServer, type WebSocket } from "ws";
 import type { IncomingMessage, Server } from "http";
 import { jwtVerify } from "jose";
-import { RoomManager } from "./roomManager.js";
+import { roomManager } from "./roomManager.js";
 import { MessageService } from "@repo/db";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
-const roomManager = new RoomManager();
 const messageService = new MessageService();
 const secret = new TextEncoder().encode(process.env["JWT_SECRET"] ?? "");
 
@@ -42,6 +41,8 @@ export function attachWS(server: Server) {
       ws.close(1008, "Invalid token");
       return;
     }
+
+    roomManager.register(userId, ws);
 
     ws.on("message", async (raw) => {
       try {

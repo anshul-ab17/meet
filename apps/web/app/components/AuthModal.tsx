@@ -303,6 +303,7 @@ export function AuthModal({ children, defaultMode = "signup" }: AuthModalProps) 
               )}
             </Button>
           </form>
+
         </>
         )}
       </DialogContent>

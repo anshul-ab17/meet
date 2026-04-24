@@ -1,4 +1,5 @@
 import { Router, type Router as ExpressRouter } from "express";
+import rateLimit from "express-rate-limit";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 import { Resend } from "resend";
@@ -8,6 +9,17 @@ import { z } from "zod";
 
 const router: ExpressRouter = Router();
 const userService = new UserService();
+
+// Rate limiting — 20 auth attempts per 15 min per IP
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts. Please try again later." },
+});
+
+router.use(authLimiter);
 const resend = new Resend(process.env["RESEND_API_KEY"]);
 const FROM = process.env["RESEND_FROM"] ?? "onboarding@resend.dev";
 
