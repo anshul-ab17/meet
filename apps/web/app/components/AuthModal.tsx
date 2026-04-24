@@ -96,9 +96,14 @@ export function AuthModal({ children, defaultMode = "signup" }: AuthModalProps) 
       const data = (await res.json()) as
         | { pending: true; userId: string }
         | { user: User; token: string }
-        | { error: string };
+        | { error: string; redirect?: "signup" };
 
       if (!res.ok) {
+        if ("redirect" in data && data.redirect === "signup") {
+          reset("signup");
+          setError("No account found — fill in your details to sign up.");
+          return;
+        }
         setError("error" in data ? data.error : "Something went wrong");
         return;
       }
@@ -172,10 +177,10 @@ export function AuthModal({ children, defaultMode = "signup" }: AuthModalProps) 
 
             <form onSubmit={handleVerifyOtp} className="flex flex-col gap-3">
               <Input
-                placeholder="Enter 6-digit code"
+                placeholder="· · · · · ·"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="text-center text-2xl tracking-[0.5em] font-bold"
+                className="text-center text-2xl tracking-[0.5em] font-bold placeholder:tracking-[0.3em] placeholder:text-gray-600 placeholder:font-light placeholder:text-xl"
                 autoFocus
                 maxLength={6}
               />

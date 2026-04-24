@@ -6,12 +6,10 @@ import { useChatStore } from "./store/useChatStore";
 import { useFriendStore } from "./store/useFriendStore";
 import { useNotificationStore } from "./store/useNotificationStore";
 import { useWS } from "./hooks/useWS";
-import { useWebRTC } from "./hooks/useWebRTC";
 import { HeroSection } from "./components/HeroSection";
 import { Sidebar } from "./components/Sidebar";
 import { ChatArea } from "./components/ChatArea";
 import { FriendsPanel } from "./components/FriendsPanel";
-import { CallOverlay } from "./components/CallOverlay";
 import { NotificationToast } from "./components/NotificationToast";
 import { TooltipProvider } from "./components/ui/tooltip";
 import type { Friend, Room } from "./types";
@@ -35,7 +33,6 @@ export default function Home() {
   const prevPendingInCountRef = useRef(0);
 
   const { send, joinRoom } = useWS(token, user?.name);
-  const { localVideoRef, remoteVideoRef, startCall, acceptCall, rejectCall, endCall } = useWebRTC(send);
 
   const authHeaders = useCallback(
     () => ({ Authorization: `Bearer ${token}`, "Content-Type": "application/json" }),
@@ -134,15 +131,6 @@ export default function Home() {
     }
   };
 
-  const handleStartCall = (userId: string, userName: string, type: "audio" | "video") => {
-    startCall(userId, userName, type).catch(console.error);
-  };
-
-  const handleStartCallFromRoom = (type: "audio" | "video") => {
-    if (!currentRoom?.participantId || !currentRoom.name) return;
-    handleStartCall(currentRoom.participantId, currentRoom.name, type);
-  };
-
   if (!user || !token) {
     return (
       <TooltipProvider>
@@ -161,14 +149,11 @@ export default function Home() {
             <FriendsPanel
               token={token}
               onOpenDM={handleOpenDM}
-              onStartCall={handleStartCall}
               onRefresh={loadFriends}
             />
           ) : currentRoom ? (
             <ChatArea
               onSendMessage={handleSendMessage}
-              onStartCall={activeSection === "dm" ? handleStartCallFromRoom : undefined}
-              onStartCallWithUser={handleStartCall}
               onOpenDM={handleOpenDM}
             />
           ) : (
@@ -177,14 +162,6 @@ export default function Home() {
             </div>
           )}
         </div>
-
-        <CallOverlay
-          localVideoRef={localVideoRef}
-          remoteVideoRef={remoteVideoRef}
-          onAccept={() => acceptCall().catch(console.error)}
-          onReject={rejectCall}
-          onEnd={endCall}
-        />
 
         <NotificationToast />
       </div>

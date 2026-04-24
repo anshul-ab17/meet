@@ -218,9 +218,7 @@ export function HeroSection() {
           <span className="text-sm font-sans font-black tracking-[0.2em] uppercase text-white">Meet 2026</span>
         </div>
         <div className="flex gap-10 text-[11px] text-gray-500 uppercase tracking-[0.2em] font-bold">
-          <a href="#" className="hover:text-primary transition-all duration-300">Privacy</a>
-          <a href="#" className="hover:text-primary transition-all duration-300">Terms</a>
-          <a href="#" className="hover:text-primary transition-all duration-300">Github</a>
+          <a href="https://github.com/anshul-ab17/meet" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-all duration-300">Github</a>
         </div>
       </footer>
 

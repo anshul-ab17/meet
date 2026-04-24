@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Phone, Video, MessageCircle, UserPlus, UserCheck, UserX } from "lucide-react";
+import { MessageCircle, UserPlus, UserCheck, UserX } from "lucide-react";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { Avatar } from "./ui/avatar";
 import { Button } from "./ui/button";
@@ -16,7 +16,6 @@ interface UserProfileModalProps {
   userName: string;
   open: boolean;
   onClose: () => void;
-  onStartCall: (userId: string, userName: string, type: "audio" | "video") => void;
   onOpenDM: (targetUserId: string, targetUserName?: string) => Promise<Room | null>;
 }
 
@@ -27,7 +26,6 @@ export function UserProfileModal({
   userName,
   open,
   onClose,
-  onStartCall,
   onOpenDM,
 }: UserProfileModalProps) {
   const currentUser = useUserStore((s) => s.user);
@@ -95,11 +93,6 @@ export function UserProfileModal({
     onClose();
   };
 
-  const handleCall = (type: "audio" | "video") => {
-    onStartCall(userId, userName, type);
-    onClose();
-  };
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-sm p-0 overflow-hidden">
@@ -160,12 +153,6 @@ export function UserProfileModal({
               <div className="flex gap-2 mt-1">
                 <Button variant="secondary" className="flex-1" onClick={handleMessage}>
                   <MessageCircle size={14} /> Message
-                </Button>
-                <Button variant="secondary" size="icon" title="Voice Call" onClick={() => handleCall("audio")}>
-                  <Phone size={14} />
-                </Button>
-                <Button variant="secondary" size="icon" title="Video Call" onClick={() => handleCall("video")}>
-                  <Video size={14} />
                 </Button>
               </div>
             </div>

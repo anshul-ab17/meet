@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { useCallStore } from "../store/useCallStore";
 import { useNotificationStore } from "../store/useNotificationStore";
 import type { Message } from "../types";
 
@@ -11,7 +10,6 @@ const WS_URL = process.env["NEXT_PUBLIC_WS_URL"] ?? "ws://localhost:3003";
 export function useWS(token: string | null, currentUserName?: string) {
   const wsRef = useRef<WebSocket | null>(null);
   const addMessage = useChatStore((s) => s.addMessage);
-  const { setIncoming, setPendingAnswer, addPendingCandidate, clear } = useCallStore();
   const addNotification = useNotificationStore((s) => s.add);
 
   useEffect(() => {
@@ -57,24 +55,6 @@ export function useWS(token: string | null, currentUserName?: string) {
           addMessage(msg);
           break;
         }
-        case "call-offer":
-          setIncoming({
-            fromUserId: data["fromUserId"] as string,
-            fromUserName: (data["fromUserName"] as string) ?? (data["fromUserId"] as string),
-            callType: data["callType"] as "audio" | "video",
-            offer: data["offer"] as RTCSessionDescriptionInit,
-          });
-          break;
-        case "call-answer":
-          setPendingAnswer(data["answer"] as RTCSessionDescriptionInit);
-          break;
-        case "call-reject":
-        case "call-end":
-          clear();
-          break;
-        case "ice-candidate":
-          addPendingCandidate(data["candidate"] as RTCIceCandidateInit);
-          break;
       }
     };
 

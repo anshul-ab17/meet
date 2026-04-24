@@ -42,7 +42,7 @@ export function Sidebar({ onCreateChannel, onOpenDM }: SidebarProps) {
   const activeDMParticipantId = activeSection === "dm" ? currentRoom?.participantId : undefined;
 
   return (
-    <div className="w-64 bg-bg-sidebar flex flex-col shrink-0 relative overflow-hidden font-sans">
+    <div className="w-[17.6rem] bg-bg-sidebar flex flex-col shrink-0 relative overflow-hidden font-sans">
       {/* Background Subtle Glow */}
       <div className="absolute top-0 left-0 w-full h-32 bg-primary/5 blur-3xl pointer-events-none" />
 

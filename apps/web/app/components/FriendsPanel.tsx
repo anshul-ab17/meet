@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { UserPlus, MessageCircle, Phone, Video, X, Check } from "lucide-react";
+import { UserPlus, MessageCircle, X, Check } from "lucide-react";
 import { useFriendStore } from "../store/useFriendStore";
 import { useChatStore } from "../store/useChatStore";
 import { Avatar } from "./ui/avatar";
@@ -17,11 +17,10 @@ type Tab = "all" | "pending" | "add";
 interface FriendsPanelProps {
   token: string;
   onOpenDM: (targetUserId: string) => Promise<Room | null>;
-  onStartCall: (userId: string, userName: string, type: "audio" | "video") => void;
   onRefresh: () => void;
 }
 
-export function FriendsPanel({ token, onOpenDM, onStartCall, onRefresh }: FriendsPanelProps) {
+export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) {
   const [tab, setTab] = useState<Tab>("all");
   const [addName, setAddName] = useState("");
   const [addError, setAddError] = useState("");
@@ -142,16 +141,6 @@ export function FriendsPanel({ token, onOpenDM, onStartCall, onRefresh }: Friend
                   <Tooltip label="Message">
                     <Button variant="secondary" size="icon" onClick={() => handleOpenDM(friend)}>
                       <MessageCircle size={15} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label="Voice Call">
-                    <Button variant="secondary" size="icon" onClick={() => onStartCall(friend.id, friend.name, "audio")}>
-                      <Phone size={15} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label="Video Call">
-                    <Button variant="secondary" size="icon" onClick={() => onStartCall(friend.id, friend.name, "video")}>
-                      <Video size={15} />
                     </Button>
                   </Tooltip>
                   <Tooltip label="Remove Friend">

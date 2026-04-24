@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { Send, Phone, Video, UserPlus, Hash, MoreHorizontal, Smile, Plus } from "lucide-react";
+import { Send, UserPlus, Hash, MoreHorizontal, Smile } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useUserStore } from "../store/useUserStore";
 import { Avatar } from "./ui/avatar";
@@ -13,8 +13,6 @@ import type { Room } from "../types";
 
 interface ChatAreaProps {
   onSendMessage: (content: string) => void;
-  onStartCall?: (type: "audio" | "video") => void;
-  onStartCallWithUser?: (userId: string, userName: string, type: "audio" | "video") => void;
   onOpenDM: (targetUserId: string) => Promise<Room | null>;
 }
 
@@ -26,7 +24,7 @@ function formatTime(createdAt: string) {
   }
 }
 
-export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOpenDM }: ChatAreaProps) {
+export function ChatArea({ onSendMessage, onOpenDM }: ChatAreaProps) {
   const [input, setInput] = useState("");
   const [profileUser, setProfileUser] = useState<{ id: string; name: string } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -69,21 +67,6 @@ export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOp
         </div>
 
         <div className="flex items-center gap-2">
-          {onStartCall && isDM && (
-            <div className="flex gap-1 mr-2">
-              <Tooltip label="Voice Call">
-                <Button variant="ghost" size="icon" onClick={() => onStartCall("audio")} className="w-9 h-9 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl">
-                  <Phone size={18} />
-                </Button>
-              </Tooltip>
-              <Tooltip label="Video Call">
-                <Button variant="ghost" size="icon" onClick={() => onStartCall("video")} className="w-9 h-9 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl">
-                  <Video size={18} />
-                </Button>
-              </Tooltip>
-            </div>
-          )}
-
           {isChannel && token && (
             <InviteToChannelModal chatId={room.chatId} channelName={room.name} token={token}>
               <Tooltip label="Invite Friends">
@@ -186,20 +169,6 @@ export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOp
                   {renderContent()}
                 </div>
 
-                {!isDM && !isOwn && !grouped && (
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
-                    <Tooltip label="Call">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 rounded-lg bg-white/5 hover:bg-primary/10 text-gray-500 hover:text-primary"
-                        onClick={() => onStartCallWithUser?.(msg.userId, msg.userName ?? msg.userId, "audio")}
-                      >
-                        <Phone size={14} />
-                      </Button>
-                    </Tooltip>
-                  </div>
-                )}
               </div>
             </div>
           );
@@ -213,10 +182,6 @@ export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOp
           onSubmit={handleSubmit} 
           className="flex items-center gap-3 bg-bg-input/80 backdrop-blur-md border border-white/[0.05] rounded-2xl px-4 py-2 shadow-xl focus-within:border-primary/30 focus-within:bg-bg-input transition-all duration-300"
         >
-          <Button type="button" variant="ghost" size="icon" className="shrink-0 text-gray-500 hover:text-gray-300 w-9 h-9">
-            <Plus size={20} />
-          </Button>
-          
           <input
             className="flex-1 bg-transparent py-2 text-white text-sm outline-none placeholder-gray-600 font-light"
             placeholder={`Message ${prefix}${room.name}`}
@@ -251,7 +216,6 @@ export function ChatArea({ onSendMessage, onStartCall, onStartCallWithUser, onOp
           userName={profileUser.name}
           open={!!profileUser}
           onClose={() => setProfileUser(null)}
-          onStartCall={(uid, uname, type) => onStartCallWithUser?.(uid, uname, type)}
           onOpenDM={onOpenDM}
         />
       )}

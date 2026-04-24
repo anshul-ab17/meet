@@ -122,7 +122,7 @@ router.post("/signin", async (req, res) => {
 
   const found = await userService.getUserByName(name.trim());
   if (!found || !found.password) {
-    res.status(401).json({ error: "Invalid credentials" });
+    res.status(404).json({ error: "No account found. Create one?", redirect: "signup" });
     return;
   }
 
