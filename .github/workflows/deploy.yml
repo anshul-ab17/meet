@@ -1,0 +1,88 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # ── Frontend → Vercel ──────────────────────────────────────────────────────
+  deploy-web:
+    name: Deploy web to Vercel
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy to Vercel
+        run: |
+          pnpm dlx vercel \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --yes \
+            --prod \
+            --cwd apps/web
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  # ── Backend → AWS EC2 via ECR ──────────────────────────────────────────────
+  deploy-server:
+    name: Deploy server to AWS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push Docker image
+        env:
+          IMAGE_URI: ${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+          LATEST_URI: ${{ secrets.ECR_REPOSITORY }}:latest
+        run: |
+          docker build -t $IMAGE_URI -t $LATEST_URI -f Dockerfile .
+          docker push $IMAGE_URI
+          docker push $LATEST_URI
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+              | docker login --username AWS --password-stdin ${{ secrets.ECR_REPOSITORY }}
+            docker pull ${{ secrets.ECR_REPOSITORY }}:latest
+            docker stop meet-server || true
+            docker rm meet-server || true
+            docker run -d \
+              --name meet-server \
+              --restart unless-stopped \
+              -p 3003:3003 \
+              --env-file /home/${{ secrets.EC2_USER }}/.env.server \
+              ${{ secrets.ECR_REPOSITORY }}:latest
