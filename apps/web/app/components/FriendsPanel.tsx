@@ -190,7 +190,7 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
                     <Avatar name={req.name} />
                     <span className="flex-1 text-white text-sm font-medium">{req.name}</span>
                     <span className="text-xs text-gray-500">Pending</span>
-                    <Button variant="ghost" size="icon" onClick={() => removePendingOut(req.id)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleCancelRequest(req.id)}>
                       <X size={15} />
                     </Button>
                   </div>

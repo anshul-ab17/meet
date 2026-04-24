@@ -5,7 +5,6 @@ on:
     branches: [main]
 
 jobs:
-  # ── Frontend → Vercel ──────────────────────────────────────────────────────
   deploy-web:
     name: Deploy web to Vercel
     runs-on: ubuntu-latest
@@ -38,8 +37,6 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
-  # ── Backend → AWS EC2 via ECR ──────────────────────────────────────────────
   deploy-server:
     name: Deploy server to AWS
     runs-on: ubuntu-latest

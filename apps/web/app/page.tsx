@@ -47,7 +47,7 @@ export default function Home() {
     setFriends(friends as Friend[]);
     setPendingIn(pendingIn as Friend[]);
     setPendingOut(pendingOut as Friend[]);
-  }, [authHeaders]);
+  }, [authHeaders, setFriends, setPendingIn, setPendingOut]);
 
   const { send, joinRoom } = useWS(token, user?.name, loadFriends);
 
@@ -58,7 +58,8 @@ export default function Home() {
     fetch(`${API_URL}/chats/global`).then((r) => r.json()).then(setGlobalRoom).catch(console.error);
     fetch(`${API_URL}/chats/channels`).then((r) => r.json()).then(setChannels).catch(console.error);
     loadFriends();
-  }, [user?.id, token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, token, loadFriends, setGlobalRoom, setChannels]);
 
   // Notify on new friend requests
   useEffect(() => {
@@ -73,7 +74,7 @@ export default function Home() {
       }
     }
     prevPendingInCountRef.current = pendingIn.length;
-  }, [pendingIn.length]);
+  }, [pendingIn, addNotification]);
 
   // Join room + load history whenever the room changes
   useEffect(() => {
@@ -88,12 +89,13 @@ export default function Home() {
       .catch(console.error);
 
     return () => { cancelled = true; };
-  }, [currentRoom?.chatId, user?.id, token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRoom?.chatId, user?.id, token, joinRoom, authHeaders, setMessages]);
 
   // Auto-select global room once loaded
   useEffect(() => {
     if (globalRoom && !currentRoom) setCurrentRoom(globalRoom);
-  }, [globalRoom]);
+  }, [globalRoom, currentRoom, setCurrentRoom]);
 
   const handleSendMessage = (content: string) => {
     if (!currentRoom || !user) return;

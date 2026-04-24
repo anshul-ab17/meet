@@ -22,7 +22,7 @@ function Toast({ n }: { n: AppNotification }) {
   useEffect(() => {
     const t = setTimeout(() => remove(n.id), 5000);
     return () => clearTimeout(t);
-  }, [n.id]);
+  }, [n.id, remove]);
 
   const Icon = ICONS[n.type];
 

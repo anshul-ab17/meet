@@ -29,7 +29,7 @@ export function EditProfileModal({ children }: EditProfileModalProps) {
       .then((r) => r.json())
       .then((data: { bio?: string }) => setBio(data.bio ?? ""))
       .catch(() => {});
-  }, [open, user?.id]);
+  }, [open, user]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -62,7 +62,7 @@ export function EditProfileModal({ children }: EditProfileModalProps) {
             <div>
               <p className="text-white font-semibold">{user.name}</p>
               <p className="text-gray-500 text-xs font-mono mt-0.5">{user.id}</p>
-              {bio && <p className="text-gray-400 text-sm mt-1 italic">"{bio}"</p>}
+              {bio && <p className="text-gray-400 text-sm mt-1 italic">&quot;{bio}&quot;</p>}
             </div>
           </div>
 

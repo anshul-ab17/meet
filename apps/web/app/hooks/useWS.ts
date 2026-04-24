@@ -12,6 +12,8 @@ export function useWS(token: string | null, currentUserName?: string, onFriendUp
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onFriendUpdateRef = useRef(onFriendUpdate);
   onFriendUpdateRef.current = onFriendUpdate;
+  const currentUserNameRef = useRef(currentUserName);
+  currentUserNameRef.current = currentUserName;
   const addMessage = useChatStore((s) => s.addMessage);
   const addChannel = useChatStore((s) => s.addChannel);
   const addNotification = useNotificationStore((s) => s.add);
@@ -45,8 +47,8 @@ export function useWS(token: string | null, currentUserName?: string, onFriendUp
             const isCurrentRoom = state.currentRoom?.chatId === msg.chatId;
 
             if (
-              currentUserName &&
-              msg.content.toLowerCase().includes(`@${currentUserName.toLowerCase()}`) &&
+              currentUserNameRef.current &&
+              msg.content.toLowerCase().includes(`@${currentUserNameRef.current.toLowerCase()}`) &&
               msg.userId !== state.currentRoom?.participantId
             ) {
               addNotification({
@@ -94,7 +96,7 @@ export function useWS(token: string | null, currentUserName?: string, onFriendUp
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
       wsRef.current?.close();
     };
-  }, [token]);
+  }, [token, addMessage, addChannel, addNotification]);
 
   const send = useCallback((data: object) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

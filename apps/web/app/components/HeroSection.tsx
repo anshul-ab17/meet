@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, Video, Users, Zap, ArrowRight, Shield, Globe, Sparkles, Hash, Send, Plus } from "lucide-react";
+import { MessageSquare, Video, Users, ArrowRight, Shield, Globe, Hash, Send, Plus } from "lucide-react";
 import { AuthModal } from "./AuthModal";
 import { Button } from "./ui/button";
 
@@ -158,7 +158,7 @@ export function HeroSection() {
                             <span className="text-[9px] text-gray-600">12:45 PM</span>
                           </div>
                           <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl rounded-tl-none px-4 py-2.5 text-gray-300 text-[11px] leading-relaxed max-w-[80%]">
-                            That's insane. Let me know when the staging environment is ready for a test call.
+                            That&apos;s insane. Let me know when the staging environment is ready for a test call.
                           </div>
                         </div>
                       </div>
