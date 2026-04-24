@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { Send, UserPlus, Hash, MoreHorizontal, Smile } from "lucide-react";
+import { Send, UserPlus, Hash, Smile } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useUserStore } from "../store/useUserStore";
 import { Avatar } from "./ui/avatar";
@@ -77,9 +77,6 @@ export function ChatArea({ onSendMessage, onOpenDM }: ChatAreaProps) {
             </InviteToChannelModal>
           )}
           
-          <Button variant="ghost" size="icon" className="w-9 h-9 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl">
-            <MoreHorizontal size={18} />
-          </Button>
         </div>
       </header>
 
