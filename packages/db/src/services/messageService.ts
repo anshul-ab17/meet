@@ -1,4 +1,5 @@
 import { Neo4jClient } from "../client.js";
+import { messages, users } from "../inMemoryDb.js";
 
 export class MessageService {
   private db = Neo4jClient.getInstance();
@@ -9,9 +10,18 @@ export class MessageService {
     chatId: string,
     content: string
   ) {
-    const session = this.db.getSession();
-
     const createdAt = new Date().toISOString();
+
+    if (this.db.isInMemory) {
+      if (!messages.has(chatId)) messages.set(chatId, []);
+      const user = users.get(userId);
+      const userName = user ? user.name : "Unknown";
+      const msg = { id: messageId, userId, chatId, content, createdAt, userName };
+      messages.get(chatId)!.push(msg);
+      return msg;
+    }
+
+    const session = this.db.getSession();
 
     await session.run(
       `
@@ -33,6 +43,10 @@ export class MessageService {
   }
 
   async getMessages(chatId: string) {
+    if (this.db.isInMemory) {
+      return messages.get(chatId) || [];
+    }
+
     const session = this.db.getSession();
 
     const res = await session.run(
@@ -55,6 +69,11 @@ export class MessageService {
   }
 
   async deleteGlobalMessages() {
+    if (this.db.isInMemory) {
+      messages.set("global", []);
+      return;
+    }
+
     const session = this.db.getSession();
     await session.run(
       `MATCH (m:Message)-[:IN]->(c:ChatRoom {id: 'global'}) DETACH DELETE m`

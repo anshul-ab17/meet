@@ -2,7 +2,8 @@ import neo4j, { Driver } from "neo4j-driver";
 
 export class Neo4jClient {
   private static instance: Neo4jClient;
-  private driver: Driver;
+  private driver: Driver | null = null;
+  public isInMemory = false;
 
   private constructor() {
     const uri = process.env.NEO4J_URI;
@@ -10,13 +11,20 @@ export class Neo4jClient {
     const password = process.env.NEO4J_PASSWORD;
 
     if (!uri || !user || !password) {
-      throw new Error(" Missing Neo4j environment variables");
+      console.warn("⚠️ Neo4j environment variables missing. Falling back to In-Memory mode.");
+      this.isInMemory = true;
+      return;
     }
 
-    this.driver = neo4j.driver(
-      uri,
-      neo4j.auth.basic(user, password)
-    );
+    try {
+      this.driver = neo4j.driver(
+        uri,
+        neo4j.auth.basic(user, password)
+      );
+    } catch (e) {
+      console.warn("⚠️ Failed to initialize Neo4j driver. Falling back to In-Memory mode.", e);
+      this.isInMemory = true;
+    }
   }
 
   static getInstance() {
@@ -27,10 +35,21 @@ export class Neo4jClient {
   }
 
   getSession() {
+    if (this.isInMemory || !this.driver) {
+      throw new Error("Cannot get session in in-memory mode");
+    }
     return this.driver.session();
   }
 
+  async verifyConnectivity() {
+    if (this.driver) {
+      await this.driver.verifyConnectivity();
+    }
+  }
+
   async close() {
-    await this.driver.close();
+    if (this.driver) {
+      await this.driver.close();
+    }
   }
 }
