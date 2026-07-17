@@ -77,19 +77,27 @@ router.post("/signup", async (req, res) => {
   const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
   await userService.setOtp(id, email, otp, expiresAt);
 
-  await resend.emails.send({
-    from: FROM,
-    to: email,
-    subject: "Your Meet verification code",
-    html: `
-      <div style="font-family:sans-serif;max-width:400px;margin:0 auto">
-        <h2 style="color:#800020">Verify your Meet account</h2>
-        <p>Hi <strong>${name}</strong>, use this code to verify your account:</p>
-        <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#800020;padding:20px 0">${otp}</div>
-        <p style="color:#666">This code expires in <strong>10 minutes</strong>.</p>
-      </div>
-    `,
-  });
+  try {
+    if (process.env["RESEND_API_KEY"] && !process.env["RESEND_API_KEY"].startsWith("re_123")) {
+      await resend.emails.send({
+        from: FROM,
+        to: email,
+        subject: "Your Meet verification code",
+        html: `
+          <div style="font-family:sans-serif;max-width:400px;margin:0 auto">
+            <h2 style="color:#800020">Verify your Meet account</h2>
+            <p>Hi <strong>${name}</strong>, use this code to verify your account:</p>
+            <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#800020;padding:20px 0">${otp}</div>
+            <p style="color:#666">This code expires in <strong>10 minutes</strong>.</p>
+          </div>
+        `,
+      });
+    }
+  } catch (e) {
+    console.warn("⚠️ Failed to send email via Resend:", e);
+  }
+
+  console.log(`\n🔑 [OTP Verification Code for ${name} (${email})]: ${otp}\n`);
 
   res.status(201).json({ pending: true, userId: id });
 });
