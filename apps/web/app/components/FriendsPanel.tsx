@@ -330,7 +330,7 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
               You can add friends with their Meet username.
             </p>
             
-            <form onSubmit={handleAddFriend} className="flex bg-[#1e1f22] border border-black/30 rounded-lg p-3 w-full focus-within:border-accent-blurple transition-colors relative">
+            <form onSubmit={handleAddFriend} className="flex bg-bg-server border border-black/30 rounded-lg p-3 w-full focus-within:border-primary transition-colors relative">
               <input
                 placeholder="You can add friends with their Meet username"
                 className="bg-transparent text-white text-[15px] outline-none placeholder:text-accent-gray/40 w-full pr-24 font-normal"
@@ -341,7 +341,7 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
               <button 
                 type="submit"
                 disabled={addLoading || !addName.trim()}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-accent-blurple hover:bg-[#4752c4] disabled:bg-[#3c4270]/70 disabled:text-[#ffffff]/30 text-white px-4 py-1.5 rounded text-sm font-semibold transition-colors shrink-0 flex items-center gap-1.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary-hover disabled:bg-primary/40 disabled:text-[#ffffff]/30 text-white px-4 py-1.5 rounded text-sm font-semibold transition-colors shrink-0 flex items-center gap-1.5"
               >
                 <UserPlus size={14} />
                 Send Friend Request

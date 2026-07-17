@@ -10,7 +10,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Meet — Chat, call, connect",
+  title: "💬 Meet — Chat, call, connect",
   description: "Channels, DMs, friends, and HD video calls — all in one place.",
 };
 

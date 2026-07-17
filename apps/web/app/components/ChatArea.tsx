@@ -210,7 +210,7 @@ export function ChatArea({ onSendMessage, onOpenDM }: ChatAreaProps) {
                       <button
                         onClick={() => clickable && setProfileUser({ id: msg.userId, name: msg.userName ?? msg.userId })}
                         className={`text-[14px] font-semibold text-white hover:underline cursor-pointer text-left leading-none ${
-                          isOwn ? "text-accent-blurple" : "hover:text-white"
+                          isOwn ? "text-primary" : "hover:text-white"
                         }`}
                       >
                         {msg.userName ?? msg.userId}

@@ -11,18 +11,19 @@ const config: Config = {
         sans: ["'Plus Jakarta Sans'", "ui-sans-serif", "system-ui"],
       },
       colors: {
-        primary: "#5865f2", // Discord Blurple
-        "primary-hover": "#4752c4", // Discord Blurple Hover
-        secondary: "#4f545c",
-        "secondary-hover": "#686d73",
-        "bg-base":    "#313338", 
-        "bg-surface": "#2b2d31", 
-        "bg-sidebar": "#2b2d31", 
-        "bg-server":  "#1e1f22",  
-        "bg-input":   "#383a40", 
-        "border-subtle": "#3f4147", 
-        "user-footer":  "#232428", 
-        "accent-blurple": "#5865f2",
+        primary: "#800020", // Original Burgundy
+        "primary-hover": "#9a0028", // Original Burgundy Hover
+        secondary: "#5c0017",
+        "secondary-hover": "#4a0012",
+        // Original Cinema Dark Palette
+        "bg-base":    "#0d0d0f", // Cinema Dark Base
+        "bg-surface": "#131316", // Cinema Dark Surface
+        "bg-sidebar": "#0a0a0c", // Cinema Dark Sidebar
+        "bg-server":  "#080809", // Cinema Dark Server list
+        "bg-input":   "#1a1a1f", // Cinema Dark Input
+        "border-subtle": "#1f1f24", // Cinema Dark Border
+        "user-footer":  "#050506", 
+        "accent-blurple": "#800020", // Mapped to Burgundy
         "accent-green": "#23a55a",
         "accent-yellow": "#f0b232",
         "accent-red": "#f23f43",
