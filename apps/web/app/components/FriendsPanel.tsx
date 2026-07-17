@@ -1,12 +1,11 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { UserPlus, MessageCircle, X, Check } from "lucide-react";
+import { UserPlus, MessageSquare, X, Check, Users } from "lucide-react";
 import { useFriendStore } from "../store/useFriendStore";
 import { useChatStore } from "../store/useChatStore";
 import { Avatar } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { Tooltip } from "./ui/tooltip";
 import type { Friend, Room } from "../types";
 import { graphqlRequest } from "../lib/graphql";
@@ -23,6 +22,7 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
   const [tab, setTab] = useState<Tab>("all");
   const [addName, setAddName] = useState("");
   const [addError, setAddError] = useState("");
+  const [addSuccess, setAddSuccess] = useState("");
   const [addLoading, setAddLoading] = useState(false);
 
   const { friends, pendingIn, pendingOut, removeFriend, removePendingIn, removePendingOut, addFriend } =
@@ -95,6 +95,7 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
     e.preventDefault();
     if (!addName.trim()) return;
     setAddError("");
+    setAddSuccess("");
     setAddLoading(true);
     try {
       const queryData = await graphqlRequest(`
@@ -118,8 +119,8 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
         }
       `, { targetUserId: targetUser.id }, token);
 
+      setAddSuccess(`Success! Your friend request to ${addName.trim()} was sent.`);
       setAddName("");
-      setAddError("");
       onRefresh();
     } catch (err: any) {
       setAddError(err.message ?? "Failed to send request");
@@ -128,136 +129,227 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
     }
   };
 
-  const tabs: { key: Tab; label: string; count?: number }[] = [
-    { key: "all", label: "All Friends", count: friends.length },
-    { key: "pending", label: "Pending", count: pendingIn.length },
-    { key: "add", label: "Add Friend" },
-  ];
-
   return (
-    <div className="flex-1 flex flex-col min-w-0">
+    <div className="flex-1 flex flex-col min-w-0 bg-bg-base select-none">
       {/* Header */}
-      <div className="h-12 flex items-center gap-4 px-4 border-b border-border-subtle shrink-0">
-        <span className="font-semibold text-white text-sm">Friends</span>
-        <div className="flex gap-1">
-          {tabs.map(({ key, label, count }) => (
+      <div className="h-12 flex items-center justify-between px-4 border-b border-black/[0.2] shrink-0 shadow-sm bg-bg-base">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-accent-gray">
+            <Users size={20} className="shrink-0" />
+            <span className="font-bold text-white text-[15px]">Friends</span>
+          </div>
+
+          <div className="w-[1px] h-4 bg-border-subtle" />
+
+          <div className="flex gap-2">
             <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors ${
-                tab === key ? "bg-bg-input text-white" : "text-gray-400 hover:text-gray-200"
+              onClick={() => setTab("all")}
+              className={`px-2 py-1 rounded text-sm font-semibold transition-colors ${
+                tab === "all" ? "bg-white/[0.08] text-white" : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text"
               }`}
             >
-              {label}
-              {count !== undefined && count > 0 && (
-                <span className="bg-primary text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {count > 9 ? "9+" : count}
+              All Friends ({friends.length})
+            </button>
+
+            <button
+              onClick={() => setTab("pending")}
+              className={`px-2 py-1 rounded text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+                tab === "pending" ? "bg-white/[0.08] text-white" : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text"
+              }`}
+            >
+              Pending
+              {pendingIn.length > 0 && (
+                <span className="bg-accent-red text-white text-[10px] font-black rounded-full w-4.5 h-4.5 flex items-center justify-center">
+                  {pendingIn.length}
                 </span>
               )}
             </button>
-          ))}
+
+            <button
+              onClick={() => setTab("add")}
+              className={`px-2 py-1 rounded text-sm font-semibold transition-colors ${
+                tab === "add" 
+                  ? "bg-accent-green/20 text-accent-green font-bold" 
+                  : "text-accent-green bg-accent-green/10 hover:bg-accent-green/20"
+              }`}
+            >
+              Add Friend
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        {/* All Friends */}
+      {/* Main Panel Content */}
+      <div className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
+        {/* All Friends List */}
         {tab === "all" && (
-          <div className="flex flex-col gap-1">
-            {friends.length === 0 && (
-              <p className="text-gray-600 text-sm text-center py-12">No friends yet. Add some!</p>
-            )}
-            {friends.map((friend) => (
-              <div
-                key={friend.id}
-                className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-bg-surface transition-colors group"
-              >
-                <Avatar name={friend.name} />
-                <span className="flex-1 text-white text-sm font-medium">{friend.name}</span>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Tooltip label="Message">
-                    <Button variant="secondary" size="icon" onClick={() => handleOpenDM(friend)}>
-                      <MessageCircle size={15} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label="Remove Friend">
-                    <Button variant="ghost" size="icon" onClick={() => handleRemoveFriend(friend.id)}>
-                      <X size={15} />
-                    </Button>
-                  </Tooltip>
-                </div>
+          <div className="flex flex-col max-w-4xl">
+            <h2 className="text-[12px] font-bold text-accent-gray uppercase tracking-wider mb-4">
+              All Friends — {friends.length}
+            </h2>
+            
+            {friends.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <p className="text-accent-gray text-sm">Your list is waiting for friends. Add some!</p>
               </div>
-            ))}
+            ) : (
+              <div className="flex flex-col">
+                {friends.map((friend) => (
+                  <div
+                    key={friend.id}
+                    className="flex items-center justify-between py-2 px-3 hover:bg-white/[0.04] rounded-md transition-colors group border-t border-white/[0.03] first:border-none"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <Avatar name={friend.name} size="md" />
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent-green rounded-full border-[3px] border-bg-base" />
+                      </div>
+                      <div className="flex flex-col leading-tight">
+                        <span className="text-white text-sm font-semibold group-hover:text-white transition-colors">{friend.name}</span>
+                        <span className="text-[12px] text-accent-gray font-medium">Online</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Tooltip label="Message">
+                        <button 
+                          onClick={() => handleOpenDM(friend)}
+                          className="w-9 h-9 rounded-full bg-bg-input text-accent-gray hover:text-white hover:bg-black/40 flex items-center justify-center transition-colors"
+                        >
+                          <MessageSquare size={18} />
+                        </button>
+                      </Tooltip>
+                      <Tooltip label="Remove Friend">
+                        <button 
+                          onClick={() => handleRemoveFriend(friend.id)}
+                          className="w-9 h-9 rounded-full bg-bg-input text-accent-gray hover:text-accent-red hover:bg-black/40 flex items-center justify-center transition-colors"
+                        >
+                          <X size={18} />
+                        </button>
+                      </Tooltip>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Pending */}
+        {/* Pending Requests */}
         {tab === "pending" && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col max-w-4xl gap-6">
             {pendingIn.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <h2 className="text-[12px] font-bold text-accent-gray uppercase tracking-wider mb-2">
                   Incoming — {pendingIn.length}
-                </p>
-                {pendingIn.map((req) => (
-                  <div key={req.id} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-bg-surface">
-                    <Avatar name={req.name} />
-                    <span className="flex-1 text-white text-sm font-medium">{req.name}</span>
-                    <Tooltip label="Accept">
-                      <Button variant="success" size="icon" onClick={() => handleAccept(req.id)}>
-                        <Check size={15} />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip label="Reject">
-                      <Button variant="danger" size="icon" onClick={() => handleReject(req.id)}>
-                        <X size={15} />
-                      </Button>
-                    </Tooltip>
-                  </div>
-                ))}
+                </h2>
+                <div className="flex flex-col">
+                  {pendingIn.map((req) => (
+                    <div 
+                      key={req.id} 
+                      className="flex items-center justify-between py-2 px-3 hover:bg-white/[0.04] rounded-md transition-colors border-t border-white/[0.03]"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar name={req.name} size="md" />
+                        <div className="flex flex-col leading-tight">
+                          <span className="text-white text-sm font-semibold">{req.name}</span>
+                          <span className="text-[12px] text-accent-gray font-medium">Incoming Friend Request</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Tooltip label="Accept">
+                          <button 
+                            onClick={() => handleAccept(req.id)}
+                            className="w-9 h-9 rounded-full bg-[#248046] hover:bg-[#1a6535] text-white flex items-center justify-center transition-colors"
+                          >
+                            <Check size={18} />
+                          </button>
+                        </Tooltip>
+                        <Tooltip label="Ignore">
+                          <button 
+                            onClick={() => handleReject(req.id)}
+                            className="w-9 h-9 rounded-full bg-bg-input text-accent-gray hover:text-accent-red hover:bg-black/40 flex items-center justify-center transition-colors"
+                          >
+                            <X size={18} />
+                          </button>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
+
             {pendingOut.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                  Sent — {pendingOut.length}
-                </p>
-                {pendingOut.map((req) => (
-                  <div key={req.id} className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-bg-surface">
-                    <Avatar name={req.name} />
-                    <span className="flex-1 text-white text-sm font-medium">{req.name}</span>
-                    <span className="text-xs text-gray-500">Pending</span>
-                    <Button variant="ghost" size="icon" onClick={() => handleCancelRequest(req.id)}>
-                      <X size={15} />
-                    </Button>
-                  </div>
-                ))}
+                <h2 className="text-[12px] font-bold text-accent-gray uppercase tracking-wider mb-2">
+                  Outgoing — {pendingOut.length}
+                </h2>
+                <div className="flex flex-col">
+                  {pendingOut.map((req) => (
+                    <div 
+                      key={req.id} 
+                      className="flex items-center justify-between py-2 px-3 hover:bg-white/[0.04] rounded-md transition-colors border-t border-white/[0.03]"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar name={req.name} size="md" />
+                        <div className="flex flex-col leading-tight">
+                          <span className="text-white text-sm font-semibold">{req.name}</span>
+                          <span className="text-[12px] text-accent-gray font-medium">Outgoing Friend Request</span>
+                        </div>
+                      </div>
+                      <Tooltip label="Cancel Request">
+                        <button 
+                          onClick={() => handleCancelRequest(req.id)}
+                          className="w-9 h-9 rounded-full bg-bg-input text-accent-gray hover:text-accent-red hover:bg-black/40 flex items-center justify-center transition-colors"
+                        >
+                          <X size={18} />
+                        </button>
+                      </Tooltip>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
+
             {pendingIn.length === 0 && pendingOut.length === 0 && (
-              <p className="text-gray-600 text-sm text-center py-12">No pending requests.</p>
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <p className="text-accent-gray text-sm">No pending friend requests.</p>
+              </div>
             )}
           </div>
         )}
 
-        {/* Add Friend */}
+        {/* Add Friend Form */}
         {tab === "add" && (
-          <div className="max-w-md">
-            <p className="text-gray-400 text-sm mb-4">
-              You can add friends by their username.
+          <div className="max-w-2xl flex flex-col">
+            <h2 className="text-[14px] font-bold text-white uppercase tracking-tight mb-1">
+              Add Friend
+            </h2>
+            <p className="text-accent-gray text-xs mb-4">
+              You can add friends with their Meet username.
             </p>
-            <form onSubmit={handleAddFriend} className="flex gap-2">
-              <Input
-                placeholder="Enter a username"
+            
+            <form onSubmit={handleAddFriend} className="flex bg-[#1e1f22] border border-black/30 rounded-lg p-3 w-full focus-within:border-accent-blurple transition-colors relative">
+              <input
+                placeholder="You can add friends with their Meet username"
+                className="bg-transparent text-white text-[15px] outline-none placeholder:text-accent-gray/40 w-full pr-24 font-normal"
                 value={addName}
                 onChange={(e) => setAddName(e.target.value)}
                 autoFocus
               />
-              <Button type="submit" disabled={addLoading || !addName.trim()}>
-                <UserPlus size={16} />
-                Send
-              </Button>
+              <button 
+                type="submit"
+                disabled={addLoading || !addName.trim()}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-accent-blurple hover:bg-[#4752c4] disabled:bg-[#3c4270]/70 disabled:text-[#ffffff]/30 text-white px-4 py-1.5 rounded text-sm font-semibold transition-colors shrink-0 flex items-center gap-1.5"
+              >
+                <UserPlus size={14} />
+                Send Friend Request
+              </button>
             </form>
-            {addError && <p className="text-red-400 text-sm mt-2">{addError}</p>}
+            
+            {addError && <p className="text-accent-red text-sm mt-3 font-medium">{addError}</p>}
+            {addSuccess && <p className="text-accent-green text-sm mt-3 font-medium">{addSuccess}</p>}
           </div>
         )}
       </div>
