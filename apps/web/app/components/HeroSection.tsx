@@ -217,8 +217,11 @@ export function HeroSection() {
           <MessageSquare size={16} className="text-primary" />
           <span className="text-sm font-sans font-black tracking-[0.2em] uppercase text-white">Meet 2026</span>
         </div>
-        <div className="flex gap-10 text-[11px] text-gray-500 uppercase tracking-[0.2em] font-bold">
-          <a href="https://github.com/anshul-ab17/meet" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-all duration-300">Github</a>
+        <div className="flex flex-wrap gap-x-8 gap-y-4 text-[11px] text-gray-500 uppercase tracking-[0.2em] font-bold">
+          <a href="https://anshulbharat.com/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-all duration-300">Website</a>
+          <a href="https://github.com/anshul-ab17/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-all duration-300">Github</a>
+          <a href="https://www.linkedin.com/in/anshul-bt17/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-all duration-300">LinkedIn</a>
+          <a href="https://x.com/anshul_ab17" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-all duration-300">X / Twitter</a>
         </div>
       </footer>
 
