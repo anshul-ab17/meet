@@ -13,6 +13,7 @@ import { FriendsPanel } from "./components/FriendsPanel";
 import { NotificationToast } from "./components/NotificationToast";
 import { TooltipProvider } from "./components/ui/tooltip";
 import type { Friend, Room } from "./types";
+import { graphqlRequest } from "./lib/graphql";
 
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3003";
 
@@ -32,22 +33,22 @@ export default function Home() {
   const addNotification = useNotificationStore((s) => s.add);
   const prevPendingInCountRef = useRef(0);
 
-  const authHeaders = useCallback(
-    () => ({ Authorization: `Bearer ${token}`, "Content-Type": "application/json" }),
-    [token]
-  );
-
   const loadFriends = useCallback(async () => {
-    const h = authHeaders();
-    const [friends, pendingIn, pendingOut] = await Promise.all([
-      fetch(`${API_URL}/friends`, { headers: h }).then((r) => r.json()),
-      fetch(`${API_URL}/friends/requests`, { headers: h }).then((r) => r.json()),
-      fetch(`${API_URL}/friends/requests/sent`, { headers: h }).then((r) => r.json()),
-    ]);
-    setFriends(friends as Friend[]);
-    setPendingIn(pendingIn as Friend[]);
-    setPendingOut(pendingOut as Friend[]);
-  }, [authHeaders, setFriends, setPendingIn, setPendingOut]);
+    try {
+      const data = await graphqlRequest(`
+        query {
+          friends { id name }
+          pendingRequests { id name }
+          sentRequests { id name }
+        }
+      `, undefined, token);
+      setFriends(data.friends || []);
+      setPendingIn(data.pendingRequests || []);
+      setPendingOut(data.sentRequests || []);
+    } catch (e) {
+      console.error("loadFriends error:", e);
+    }
+  }, [token, setFriends, setPendingIn, setPendingOut]);
 
   const { send, joinRoom } = useWS(token, user?.name, loadFriends);
 
@@ -55,8 +56,16 @@ export default function Home() {
   useEffect(() => {
     if (!user || !token) return;
 
-    fetch(`${API_URL}/chats/global`).then((r) => r.json()).then(setGlobalRoom).catch(console.error);
-    fetch(`${API_URL}/chats/channels`).then((r) => r.json()).then(setChannels).catch(console.error);
+    graphqlRequest(`
+      query {
+        globalRoom { chatId name type }
+        channels { chatId name type }
+      }
+    `, undefined, token).then((data) => {
+      if (data.globalRoom) setGlobalRoom(data.globalRoom);
+      if (data.channels) setChannels(data.channels);
+    }).catch(console.error);
+
     loadFriends();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, token, loadFriends, setGlobalRoom, setChannels]);
@@ -83,14 +92,25 @@ export default function Home() {
 
     joinRoom(currentRoom.chatId);
 
-    fetch(`${API_URL}/messages/${currentRoom.chatId}`, { headers: authHeaders() })
-      .then((r) => r.json())
-      .then((msgs) => { if (!cancelled) setMessages(msgs); })
+    graphqlRequest(`
+      query GetMessages($chatId: ID!) {
+        messages(chatId: $chatId) {
+          id
+          content
+          createdAt
+          userId
+          userName
+        }
+      }
+    `, { chatId: currentRoom.chatId }, token)
+      .then((data) => {
+        if (!cancelled && data.messages) setMessages(data.messages);
+      })
       .catch(console.error);
 
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentRoom?.chatId, user?.id, token, joinRoom, authHeaders, setMessages]);
+  }, [currentRoom?.chatId, user?.id, token, joinRoom, setMessages]);
 
   // Auto-select global room once loaded
   useEffect(() => {
@@ -103,26 +123,37 @@ export default function Home() {
   };
 
   const handleCreateChannel = async (name: string) => {
-    const res = await fetch(`${API_URL}/chats/channels`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({ name }),
-    });
-    const room = (await res.json()) as Room;
-    setChannels([...channels, room]);
-    setCurrentRoom(room);
-    useChatStore.getState().setActiveSection("channel");
+    try {
+      const data = await graphqlRequest(`
+        mutation CreateChannel($name: String!) {
+          createChannel(name: $name) {
+            chatId
+            name
+            type
+          }
+        }
+      `, { name }, token);
+      const room = data.createChannel as Room;
+      setChannels([...channels, room]);
+      setCurrentRoom(room);
+      useChatStore.getState().setActiveSection("channel");
+    } catch (e) {
+      console.error("createChannel error:", e);
+    }
   };
 
   const handleOpenDM = async (targetUserId: string, targetUserName?: string): Promise<Room | null> => {
     try {
-      const res = await fetch(`${API_URL}/dm`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ targetUserId }),
-      });
-      if (!res.ok) return null;
-      const raw = (await res.json()) as Room;
+      const data = await graphqlRequest(`
+        mutation GetOrCreateDM($targetUserId: ID!) {
+          getOrCreateDM(targetUserId: $targetUserId) {
+            chatId
+            name
+            type
+          }
+        }
+      `, { targetUserId }, token);
+      const raw = data.getOrCreateDM as Room;
       const room: Room = { ...raw, name: targetUserName ?? raw.name, participantId: targetUserId };
       addDM(room);
       setCurrentRoom(room);
