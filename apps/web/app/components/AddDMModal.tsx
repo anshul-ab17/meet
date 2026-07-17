@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import type { Room } from "../types";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3003";
+import { graphqlRequest } from "../lib/graphql";
 
 interface AddDMModalProps {
   children: React.ReactNode;
@@ -25,18 +25,29 @@ export function AddDMModal({ children, onOpen }: AddDMModalProps) {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/users/by-name/${encodeURIComponent(username.trim())}`);
-      if (!res.ok) { setError("User not found"); return; }
-      const user = (await res.json()) as { id: string; name: string };
-      const result = await onOpen(user.id, user.name);
+      const data = await graphqlRequest(`
+        query UserByName($name: String!) {
+          userByName(name: $name) {
+            id
+            name
+          }
+        }
+      `, { name: username.trim() });
+
+      const targetUser = data.userByName;
+      if (!targetUser) {
+        setError("User not found");
+        return;
+      }
+      const result = await onOpen(targetUser.id, targetUser.name);
       if (result) {
         setUsername("");
         setOpen(false);
       } else {
         setError("Could not open DM");
       }
-    } catch {
-      setError("Something went wrong");
+    } catch (err: any) {
+      setError(err.message ?? "Something went wrong");
     } finally {
       setLoading(false);
     }

@@ -6,7 +6,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3003";
+import { graphqlRequest } from "../lib/graphql";
 
 interface InviteToChannelModalProps {
   chatId: string;
@@ -21,31 +21,36 @@ export function InviteToChannelModal({ chatId, channelName, token, children }: I
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
-
   const handleInvite = async (e: FormEvent) => {
     e.preventDefault();
     if (!username.trim()) return;
     setStatus(null);
     setLoading(true);
     try {
-      const userRes = await fetch(`${API_URL}/users/by-name/${encodeURIComponent(username.trim())}`, { headers });
-      if (!userRes.ok) {
+      const queryData = await graphqlRequest(`
+        query UserByName($name: String!) {
+          userByName(name: $name) {
+            id
+          }
+        }
+      `, { name: username.trim() }, token);
+
+      const targetUser = queryData.userByName;
+      if (!targetUser) {
         setStatus({ ok: false, msg: "User not found" });
         return;
       }
-      const { id: userId } = (await userRes.json()) as { id: string; name: string };
-      const res = await fetch(`${API_URL}/chats/channels/${chatId}/join`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ userId }),
-      });
-      if (res.ok) {
-        setStatus({ ok: true, msg: `${username.trim()} added to #${channelName}` });
-        setUsername("");
-      } else {
-        setStatus({ ok: false, msg: "Failed to invite user" });
-      }
+
+      await graphqlRequest(`
+        mutation JoinRoom($userId: ID!, $chatId: ID!) {
+          joinRoom(userId: $userId, chatId: $chatId)
+        }
+      `, { userId: targetUser.id, chatId }, token);
+
+      setStatus({ ok: true, msg: `${username.trim()} added to #${channelName}` });
+      setUsername("");
+    } catch (err: any) {
+      setStatus({ ok: false, msg: err.message ?? "Failed to invite user" });
     } finally {
       setLoading(false);
     }

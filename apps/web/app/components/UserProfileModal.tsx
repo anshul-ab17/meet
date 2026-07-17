@@ -9,7 +9,7 @@ import { useFriendStore } from "../store/useFriendStore";
 import { useUserStore } from "../store/useUserStore";
 import type { Room } from "../types";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3003";
+import { graphqlRequest } from "../lib/graphql";
 
 interface UserProfileModalProps {
   userId: string;
@@ -48,19 +48,30 @@ export function UserProfileModal({
   // Load profile bio
   useEffect(() => {
     if (!open) return;
-    fetch(`${API_URL}/users/${userId}`)
-      .then((r) => r.json())
-      .then((d: { bio?: string }) => setBio(d.bio ?? null))
+    graphqlRequest(`
+      query GetUser($id: ID!) {
+        user(id: $id) {
+          bio
+        }
+      }
+    `, { id: userId }, token)
+      .then((data) => {
+        if (data.user) setBio(data.user.bio ?? null);
+      })
       .catch(() => setBio(null));
-  }, [open, userId]);
-
-  const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+  }, [open, userId, token]);
 
   const handleSendRequest = async () => {
     setLoading(true);
     try {
-      await fetch(`${API_URL}/friends/request/${userId}`, { method: "POST", headers: authHeaders });
+      await graphqlRequest(`
+        mutation SendFriendRequest($targetUserId: ID!) {
+          sendFriendRequest(targetUserId: $targetUserId)
+        }
+      `, { targetUserId: userId }, token);
       setPendingOut([...pendingOut, { id: userId, name: userName }]);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -69,9 +80,15 @@ export function UserProfileModal({
   const handleAccept = async () => {
     setLoading(true);
     try {
-      await fetch(`${API_URL}/friends/accept/${userId}`, { method: "POST", headers: authHeaders });
+      await graphqlRequest(`
+        mutation AcceptFriendRequest($requesterId: ID!) {
+          acceptFriendRequest(requesterId: $requesterId)
+        }
+      `, { requesterId: userId }, token);
       addFriend({ id: userId, name: userName });
       removePendingIn(userId);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -80,9 +97,32 @@ export function UserProfileModal({
   const handleRemove = async () => {
     setLoading(true);
     try {
-      await fetch(`${API_URL}/friends/${userId}`, { method: "DELETE", headers: authHeaders });
+      await graphqlRequest(`
+        mutation RemoveFriend($friendId: ID!) {
+          removeFriend(friendId: $friendId)
+        }
+      `, { friendId: userId }, token);
+
+      try {
+        await graphqlRequest(`
+          mutation CancelRequest($targetUserId: ID!) {
+            cancelFriendRequest(targetUserId: $targetUserId)
+          }
+        `, { targetUserId: userId }, token);
+      } catch {}
+      try {
+        await graphqlRequest(`
+          mutation RejectRequest($requesterId: ID!) {
+            rejectFriendRequest(requesterId: $requesterId)
+          }
+        `, { requesterId: userId }, token);
+      } catch {}
+
       removeFriend(userId);
       removePendingOut(userId);
+      removePendingIn(userId);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }

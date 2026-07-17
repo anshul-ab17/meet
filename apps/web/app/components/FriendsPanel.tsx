@@ -9,8 +9,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Tooltip } from "./ui/tooltip";
 import type { Friend, Room } from "../types";
-
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3003";
+import { graphqlRequest } from "../lib/graphql";
 
 type Tab = "all" | "pending" | "add";
 
@@ -30,36 +29,66 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
     useFriendStore();
   const setActiveSection = useChatStore((s) => s.setActiveSection);
 
-  const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
-
   const handleOpenDM = async (friend: Friend) => {
     const room = await onOpenDM(friend.id);
     if (room) setActiveSection("dm");
   };
 
   const handleAccept = async (requesterId: string) => {
-    await fetch(`${API_URL}/friends/accept/${requesterId}`, { method: "POST", headers: authHeaders });
-    const accepted = pendingIn.find((f) => f.id === requesterId);
-    if (accepted) {
-      addFriend(accepted);
-      removePendingIn(requesterId);
+    try {
+      await graphqlRequest(`
+        mutation Accept($requesterId: ID!) {
+          acceptFriendRequest(requesterId: $requesterId)
+        }
+      `, { requesterId }, token);
+      const accepted = pendingIn.find((f) => f.id === requesterId);
+      if (accepted) {
+        addFriend(accepted);
+        removePendingIn(requesterId);
+      }
+      onRefresh();
+    } catch (e) {
+      console.error(e);
     }
-    onRefresh();
   };
 
   const handleReject = async (requesterId: string) => {
-    await fetch(`${API_URL}/friends/request/${requesterId}`, { method: "DELETE", headers: authHeaders });
-    removePendingIn(requesterId);
+    try {
+      await graphqlRequest(`
+        mutation Reject($requesterId: ID!) {
+          rejectFriendRequest(requesterId: $requesterId)
+        }
+      `, { requesterId }, token);
+      removePendingIn(requesterId);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleCancelRequest = async (targetId: string) => {
-    await fetch(`${API_URL}/friends/request/sent/${targetId}`, { method: "DELETE", headers: authHeaders });
-    removePendingOut(targetId);
+    try {
+      await graphqlRequest(`
+        mutation Cancel($targetId: ID!) {
+          cancelFriendRequest(targetUserId: $targetId)
+        }
+      `, { targetId }, token);
+      removePendingOut(targetId);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleRemoveFriend = async (friendId: string) => {
-    await fetch(`${API_URL}/friends/${friendId}`, { method: "DELETE", headers: authHeaders });
-    removeFriend(friendId);
+    try {
+      await graphqlRequest(`
+        mutation RemoveFriend($friendId: ID!) {
+          removeFriend(friendId: $friendId)
+        }
+      `, { friendId }, token);
+      removeFriend(friendId);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleAddFriend = async (e: FormEvent) => {
@@ -68,25 +97,32 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
     setAddError("");
     setAddLoading(true);
     try {
-      // Look up user by name to get their id
-      const userRes = await fetch(`${API_URL}/users/by-name/${encodeURIComponent(addName.trim())}`, { headers: authHeaders });
-      if (!userRes.ok) {
+      const queryData = await graphqlRequest(`
+        query UserByName($name: String!) {
+          userByName(name: $name) {
+            id
+            name
+          }
+        }
+      `, { name: addName.trim() }, token);
+
+      const targetUser = queryData.userByName;
+      if (!targetUser) {
         setAddError("User not found");
         return;
       }
-      const targetUser = (await userRes.json()) as { id: string; name: string };
-      const res = await fetch(`${API_URL}/friends/request/${targetUser.id}`, {
-        method: "POST",
-        headers: authHeaders,
-      });
-      if (res.ok) {
-        setAddName("");
-        setAddError("");
-        onRefresh();
-      } else {
-        const body = (await res.json()) as { error?: string };
-        setAddError(body.error ?? "Failed to send request");
-      }
+
+      await graphqlRequest(`
+        mutation SendRequest($targetUserId: ID!) {
+          sendFriendRequest(targetUserId: $targetUserId)
+        }
+      `, { targetUserId: targetUser.id }, token);
+
+      setAddName("");
+      setAddError("");
+      onRefresh();
+    } catch (err: any) {
+      setAddError(err.message ?? "Failed to send request");
     } finally {
       setAddLoading(false);
     }

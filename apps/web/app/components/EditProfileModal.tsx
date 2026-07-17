@@ -6,8 +6,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Avatar } from "./ui/avatar";
 import { useUserStore } from "../store/useUserStore";
-
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3003";
+import { graphqlRequest } from "../lib/graphql";
 
 interface EditProfileModalProps {
   children: React.ReactNode;
@@ -25,11 +24,18 @@ export function EditProfileModal({ children }: EditProfileModalProps) {
   // Load existing bio when modal opens
   useEffect(() => {
     if (!open || !user) return;
-    fetch(`${API_URL}/users/${user.id}`)
-      .then((r) => r.json())
-      .then((data: { bio?: string }) => setBio(data.bio ?? ""))
+    graphqlRequest(`
+      query GetUser($id: ID!) {
+        user(id: $id) {
+          bio
+        }
+      }
+    `, { id: user.id }, token)
+      .then((data) => {
+        if (data.user) setBio(data.user.bio ?? "");
+      })
       .catch(() => {});
-  }, [open, user]);
+  }, [open, user, token]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -37,13 +43,18 @@ export function EditProfileModal({ children }: EditProfileModalProps) {
     setLoading(true);
     setSaved(false);
     try {
-      await fetch(`${API_URL}/users/me`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ bio }),
-      });
+      await graphqlRequest(`
+        mutation UpdateProfile($bio: String!) {
+          updateProfile(bio: $bio) {
+            id
+            bio
+          }
+        }
+      `, { bio }, token);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
