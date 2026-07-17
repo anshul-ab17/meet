@@ -13,6 +13,7 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { typeDefs } from "./graphql/schema.js";
 import { resolvers } from "./graphql/resolvers.js";
+import { jwtVerify } from "jose";
 import { authRoutes } from "./auth/routes.js";
 import { authMiddleware } from "./auth/middleware.js";
 import { userRoutes } from "./routes/userRoutes.js";
@@ -21,7 +22,7 @@ import { dmRoutes } from "./routes/dmRoutes.js";
 import { messageRoutes } from "./routes/messageRoutes.js";
 import { friendRoutes } from "./routes/friendRoutes.js";
 import { attachWS } from "./ws/wsServer.js";
-import { ChatService, MessageService } from "@repo/db";
+import { ChatService, MessageService, Neo4jClient } from "@repo/db";
 
 const PORT = 3003;
 
@@ -37,14 +38,45 @@ app.use("/dm", authMiddleware, dmRoutes);
 app.use("/messages", authMiddleware, messageRoutes);
 app.use("/friends", authMiddleware, friendRoutes);
 
+const secret = new TextEncoder().encode(process.env["JWT_SECRET"] || "default-jwt-secret-key-1234567890");
+
 const apollo = new ApolloServer({ typeDefs, resolvers });
 await apollo.start();
 
-app.use("/graphql", expressMiddleware(apollo) as unknown as RequestHandler);
+app.use(
+  "/graphql",
+  expressMiddleware(apollo, {
+    context: async ({ req }) => {
+      const header = req.headers.authorization;
+      if (header?.startsWith("Bearer ")) {
+        try {
+          const token = header.slice(7);
+          const { payload } = await jwtVerify(token, secret);
+          return { user: payload };
+        } catch {
+          // invalid token
+        }
+      }
+      return {};
+    },
+  }) as unknown as RequestHandler
+);
 
 const server = createServer(app);
 
 attachWS(server);
+
+// Verify database connectivity
+try {
+  const dbClient = Neo4jClient.getInstance();
+  if (!dbClient.isInMemory) {
+    await dbClient.verifyConnectivity();
+    console.log("✅ Neo4j connection verified successfully.");
+  }
+} catch (e) {
+  console.warn("⚠️ Neo4j server is unreachable. Falling back to In-Memory mode.");
+  Neo4jClient.getInstance().isInMemory = true;
+}
 
 // Seed global room
 await new ChatService().getOrCreateGlobal();
