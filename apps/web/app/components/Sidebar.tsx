@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, Hash, Users, Plus, LogOut, ChevronDown, ChevronRight, Settings, MessageSquare, Compass, Mic, Headphones } from "lucide-react";
+import { Globe, Hash, Compass, Plus, LogOut, ChevronDown, Users, Search, MessageSquare, Mic, Headphones, Settings } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useFriendStore } from "../store/useFriendStore";
 import { useUserStore } from "../store/useUserStore";
 import { Avatar } from "./ui/avatar";
-import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Tooltip } from "./ui/tooltip";
 import { CreateChannelModal } from "./CreateChannelModal";
@@ -36,17 +35,13 @@ export function Sidebar({ onCreateChannel, onOpenDM }: SidebarProps) {
     }
   };
 
-  const handleHomeClick = () => {
-    setActiveSection("friends");
-  };
+  const handleHomeClick = () => setActiveSection("friends");
 
   const handleMeetServerClick = () => {
     setActiveSection("channel");
     if (channels.length > 0) {
-      const isCurrentChannel = currentRoom && channels.some(c => c.chatId === currentRoom.chatId);
-      if (!isCurrentChannel) {
-        setCurrentRoom(channels[0] ?? null);
-      }
+      const isCurrentChannel = currentRoom && channels.some((c) => c.chatId === currentRoom.chatId);
+      if (!isCurrentChannel) setCurrentRoom(channels[0] ?? null);
     }
   };
 
@@ -58,141 +53,102 @@ export function Sidebar({ onCreateChannel, onOpenDM }: SidebarProps) {
   };
 
   const activeDMParticipantId = activeSection === "dm" ? currentRoom?.participantId : undefined;
+  const isHome = activeSection === "friends" || activeSection === "dm";
+
+  const navItem = (active: boolean) =>
+    `flex items-center gap-3 w-full rounded-xl px-2.5 py-1.5 transition-all duration-200 ${
+      active ? "bg-[#f0b46a]/15 text-white" : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text"
+    }`;
+
+  const navIcon = (active: boolean) =>
+    `flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors ${
+      active ? "border-[#f0b46a] bg-[#f0b46a] text-black" : "border-white/10 bg-white/[0.03] text-accent-gray"
+    }`;
 
   return (
     <div className="flex h-full shrink-0 font-sans select-none">
-      {/* 1. Leftmost Server Sidebar (72px) */}
-      <div className="w-[72px] bg-bg-server flex flex-col items-center py-3 gap-2 shrink-0">
-        {/* Home Button (Direct Messages / Friends) */}
+      {/* 1. Server rail (72px) — circular icon nav */}
+      <div className="flex w-[72px] shrink-0 flex-col items-center gap-2 bg-[#0a0a0c] py-3">
         <Tooltip label="Direct Messages">
-          <button
-            onClick={handleHomeClick}
-            className="relative group w-12 h-12 flex items-center justify-center transition-all duration-300"
-          >
-            <div className={`absolute left-0 w-1 bg-white rounded-r transition-all duration-300 ${
-              activeSection === "friends" || activeSection === "dm"
-                ? "h-10"
-                : "h-0 group-hover:h-5"
-            }`} />
-            
-            <div className={`w-12 h-12 flex items-center justify-center transition-all duration-300 ${
-              activeSection === "friends" || activeSection === "dm"
-                ? "rounded-[16px] bg-primary text-white"
-                : "rounded-[24px] bg-bg-input text-accent-gray hover:rounded-[16px] hover:bg-primary hover:text-white"
-            }`}>
-              <MessageSquare size={22} />
-            </div>
+          <button onClick={handleHomeClick} className="group flex w-12 flex-col items-center gap-1 transition-all">
+            <span className={navIcon(isHome)}>
+              <MessageSquare size={18} />
+            </span>
           </button>
         </Tooltip>
 
-        {/* Separator */}
-        <div className="w-8 h-[2px] bg-border-subtle rounded my-1" />
+        <div className="my-1 h-[2px] w-8 rounded bg-border-subtle" />
 
-        {/* Meet Server Button */}
         <Tooltip label="Meet Server">
-          <button
-            onClick={handleMeetServerClick}
-            className="relative group w-12 h-12 flex items-center justify-center transition-all duration-300"
-          >
-            <div className={`absolute left-0 w-1 bg-white rounded-r transition-all duration-300 ${
-              activeSection === "channel"
-                ? "h-10"
-                : "h-0 group-hover:h-5"
-            }`} />
-            
-            <div className={`w-12 h-12 flex items-center justify-center text-lg font-black transition-all duration-300 ${
-              activeSection === "channel"
-                ? "rounded-[16px] bg-primary text-white"
-                : "rounded-[24px] bg-bg-input text-accent-gray hover:rounded-[16px] hover:bg-primary hover:text-white"
-            }`}>
-              M
-            </div>
+          <button onClick={handleMeetServerClick} className="group flex w-12 flex-col items-center gap-1 transition-all">
+            <span className={navIcon(activeSection === "channel")}>M</span>
           </button>
         </Tooltip>
 
-        {/* Global Discovery Button */}
         {globalRoom && (
           <Tooltip label="Global Discovery">
-            <button
-              onClick={handleGlobalDiscoveryClick}
-              className="relative group w-12 h-12 flex items-center justify-center transition-all duration-300"
-            >
-              <div className={`absolute left-0 w-1 bg-white rounded-r transition-all duration-300 ${
-                activeSection === "global"
-                  ? "h-10"
-                  : "h-0 group-hover:h-5"
-              }`} />
-              
-              <div className={`w-12 h-12 flex items-center justify-center transition-all duration-300 ${
-                activeSection === "global"
-                  ? "rounded-[16px] bg-accent-green text-white"
-                  : "rounded-[24px] bg-bg-input text-accent-gray hover:rounded-[16px] hover:bg-accent-green hover:text-white"
-              }`}>
-                <Compass size={22} />
-              </div>
+            <button onClick={handleGlobalDiscoveryClick} className="group flex w-12 flex-col items-center gap-1 transition-all">
+              <span className={navIcon(activeSection === "global")}>
+                <Compass size={18} />
+              </span>
             </button>
           </Tooltip>
         )}
 
-        {/* Add Channel Button (Dashed green button) */}
         <CreateChannelModal onCreate={onCreateChannel}>
           <Tooltip label="Add a Channel">
-            <button
-              className="relative group w-12 h-12 flex items-center justify-center transition-all duration-300 mt-1"
-            >
-              <div className="w-12 h-12 flex items-center justify-center rounded-[24px] bg-bg-input text-accent-green hover:rounded-[16px] hover:bg-accent-green hover:text-white transition-all duration-300">
-                <Plus size={22} />
-              </div>
+            <button className="group mt-1 flex w-12 flex-col items-center gap-1">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-dashed border-white/15 bg-white/[0.03] text-accent-green transition-all hover:border-accent-green hover:bg-accent-green hover:text-black">
+                <Plus size={18} />
+              </span>
             </button>
           </Tooltip>
         </CreateChannelModal>
       </div>
 
-      {/* 2. Main Sidebar (240px) */}
-      <div className="w-[240px] bg-bg-sidebar flex flex-col shrink-0 relative overflow-hidden">
-        {/* Header */}
-        {activeSection === "friends" || activeSection === "dm" ? (
-          <div className="h-12 border-b border-black/[0.2] flex items-center px-3 shrink-0 shadow-sm">
-            <button className="w-full text-left text-xs bg-bg-server text-accent-gray px-2 py-1.5 rounded truncate hover:text-accent-text transition-colors">
-              Find or start a conversation
+      {/* 2. Channel list (240px) */}
+      <div className="flex w-[248px] shrink-0 flex-col overflow-hidden bg-[#131316]">
+        {/* Header + search */}
+        <div className="shrink-0 border-b border-black/30 px-3 pb-3 pt-3">
+          {isHome ? (
+            <div className="mb-3 flex h-9 items-center px-1 text-sm font-bold text-white">Direct Messages</div>
+          ) : (
+            <button className="mb-3 flex w-full items-center justify-between px-1 text-sm font-bold text-white transition-colors hover:opacity-80">
+              <span className="truncate">Meet Server</span>
+              <ChevronDown size={18} className="text-accent-gray" />
             </button>
+          )}
+          <div className="flex items-center gap-2 rounded-full bg-white/[0.05] px-3 py-1.5">
+            <Search size={15} className="text-accent-gray" />
+            <input
+              placeholder="Search"
+              className="w-full bg-transparent text-[13px] text-white outline-none placeholder:text-accent-gray/60"
+            />
           </div>
-        ) : (
-          <div className="h-12 border-b border-black/[0.2] flex items-center justify-between px-4 shrink-0 font-bold text-white shadow-sm hover:bg-white/[0.02] cursor-pointer transition-colors">
-            <span className="truncate">Meet Server</span>
-            <ChevronDown size={18} className="text-accent-gray" />
-          </div>
-        )}
+        </div>
 
         {/* Navigation list */}
-        <div className="flex-1 overflow-y-auto px-2 py-3 flex flex-col gap-0.5 custom-scrollbar">
-          {activeSection === "friends" || activeSection === "dm" ? (
-            // Home / Direct Messages view
+        <div className="flex-1 overflow-y-auto px-2 py-3 custom-scrollbar">
+          {isHome ? (
             <>
               <button
                 onClick={() => setActiveSection("friends")}
-                className={`w-full text-left flex items-center justify-between gap-3 px-2 py-2 rounded text-sm transition-all duration-150 group ${
-                  activeSection === "friends"
-                    ? "bg-white/[0.08] text-white"
-                    : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text"
-                }`}
+                className={`${navItem(activeSection === "friends")} mb-3`}
               >
-                <div className="flex items-center gap-3">
-                  <Users size={20} className={`shrink-0 ${activeSection === "friends" ? "text-white" : "text-accent-gray group-hover:text-accent-text"}`} />
-                  <span className="font-semibold text-[14px]">Friends</span>
-                </div>
+                <span className={navIcon(activeSection === "friends")}>
+                  <Users size={18} />
+                </span>
+                <span className="text-[13px] font-semibold">Friends</span>
                 {pendingIn.length > 0 && (
-                  <span className="bg-accent-red text-white text-xs font-bold rounded-full px-1.5 py-0.5">
+                  <span className="ml-auto rounded-full bg-accent-red px-1.5 py-0.5 text-[10px] font-bold text-white">
                     {pendingIn.length}
                   </span>
                 )}
               </button>
 
-              <div className="mt-4 flex items-center justify-between px-2 mb-1">
-                <span className="text-[11px] font-bold text-accent-gray uppercase tracking-wider">
-                  Direct Messages
-                </span>
-              </div>
+              <p className="px-2.5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gray/70">
+                Direct Messages
+              </p>
 
               <div className="flex flex-col gap-0.5">
                 {friends.map((friend) => {
@@ -201,53 +157,35 @@ export function Sidebar({ onCreateChannel, onOpenDM }: SidebarProps) {
                     <button
                       key={friend.id}
                       onClick={() => handleFriendDM(friend.id, friend.name)}
-                      className={`w-full text-left flex items-center gap-3 px-2 py-1.5 rounded text-sm transition-all duration-150 group ${
-                        isActive
-                          ? "bg-white/[0.08] text-white font-semibold"
-                          : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text font-medium"
-                      }`}
+                      className={`${navItem(isActive)}`}
                     >
-                      <div className="relative shrink-0">
+                      <span className={navIcon(isActive)}>
                         <Avatar name={friend.name} size="sm" />
-                        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent-green rounded-full border-[3px] border-bg-sidebar" />
-                      </div>
-                      <span className="truncate">{friend.name}</span>
+                      </span>
+                      <span className="truncate text-[13px] font-medium">{friend.name}</span>
                     </button>
                   );
                 })}
                 {friends.length === 0 && (
-                  <p className="px-2 py-1 text-xs text-accent-gray/60 italic font-light">Start a conversation</p>
+                  <p className="px-3 py-1 text-xs italic font-light text-accent-gray/50">Start a conversation</p>
                 )}
               </div>
             </>
           ) : (
-            // Channels View
             <>
-              {/* Global Discovery Shortcut */}
               {globalRoom && (
-                <button
-                  onClick={() => selectRoom(globalRoom, "global")}
-                  className={`w-full text-left flex items-center gap-2.5 px-2 py-2 rounded text-sm transition-all duration-150 group mb-4 ${
-                    activeSection === "global"
-                      ? "bg-white/[0.08] text-white"
-                      : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text"
-                  }`}
-                >
-                  <Globe size={20} className={`shrink-0 ${activeSection === "global" ? "text-white" : "text-accent-gray group-hover:text-accent-text"}`} />
-                  <span className="font-semibold text-[14px]">Global Discovery</span>
+                <button onClick={() => selectRoom(globalRoom, "global")} className={`${navItem(activeSection === "global")} mb-3`}>
+                  <span className={navIcon(activeSection === "global")}>
+                    <Globe size={18} />
+                  </span>
+                  <span className="text-[13px] font-semibold">Global Discovery</span>
                 </button>
               )}
 
-              <div className="flex items-center justify-between px-2 mb-1 group">
-                <span className="text-[11px] font-black text-accent-gray uppercase tracking-wider flex items-center gap-0.5">
-                  <ChevronDown size={12} className="text-accent-gray" />
-                  Text Channels
-                </span>
+              <div className="flex items-center justify-between px-2.5 pb-1 pt-2">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gray/70">Text Channels</p>
                 <CreateChannelModal onCreate={onCreateChannel}>
-                  <button
-                    title="Create Channel"
-                    className="text-accent-gray hover:text-white transition-colors"
-                  >
+                  <button title="Create Channel" className="text-accent-gray transition-colors hover:text-white">
                     <Plus size={16} />
                   </button>
                 </CreateChannelModal>
@@ -257,70 +195,66 @@ export function Sidebar({ onCreateChannel, onOpenDM }: SidebarProps) {
                 {channels.map((room) => {
                   const isActive = currentRoom?.chatId === room.chatId && activeSection === "channel";
                   return (
-                    <button
-                      key={room.chatId}
-                      onClick={() => selectRoom(room, "channel")}
-                      className={`w-full text-left flex items-center gap-1.5 px-2 py-1.5 rounded text-sm transition-all duration-150 group ${
-                        isActive
-                          ? "bg-white/[0.08] text-white font-semibold"
-                          : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text font-medium"
-                      }`}
-                    >
-                      <Hash size={20} className={`shrink-0 ${isActive ? "text-white" : "text-accent-gray group-hover:text-accent-text"}`} />
-                      <span className="truncate lowercase">{room.name}</span>
+                    <button key={room.chatId} onClick={() => selectRoom(room, "channel")} className={`${navItem(isActive)}`}>
+                      <span className={navIcon(isActive)}>
+                        <Hash size={16} />
+                      </span>
+                      <span className="truncate text-[13px] font-medium lowercase">{room.name}</span>
                     </button>
                   );
                 })}
                 {channels.length === 0 && (
-                  <p className="px-2 py-1 text-xs text-accent-gray/60 italic font-light">No channels created</p>
+                  <p className="px-3 py-1 text-xs italic font-light text-accent-gray/50">No channels created</p>
                 )}
               </div>
             </>
           )}
         </div>
 
-        {/* Discord user status footer */}
-        <div className="h-[52px] px-2 bg-user-footer flex items-center justify-between shrink-0 border-t border-black/[0.15]">
+        {/* User status footer */}
+        <div className="flex h-[52px] shrink-0 items-center justify-between border-t border-black/30 bg-[#0d0d0f] px-2">
           {user && (
-            <div className="flex items-center justify-between w-full">
+            <>
               <EditProfileModal>
-                <div className="flex items-center gap-2 min-w-0 p-1 rounded hover:bg-white/[0.05] cursor-pointer flex-1">
-                  <div className="relative shrink-0">
-                    <Avatar name={user.name} size="sm" />
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent-green rounded-full border-[3px] border-user-footer" />
-                  </div>
-                  <div className="flex flex-col min-w-0 leading-none">
-                    <span className="text-white text-xs font-semibold truncate">{user.name}</span>
-                    <span className="text-accent-gray text-[10px] truncate mt-0.5">Online</span>
+                <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded p-1 hover:bg-white/[0.05]">
+                  <Avatar name={user.name} size="sm" />
+                  <div className="flex min-w-0 flex-col leading-none">
+                    <span className="truncate text-xs font-semibold text-white">{user.name}</span>
+                    <span className="mt-0.5 truncate text-[10px] text-accent-gray">Online</span>
                   </div>
                 </div>
               </EditProfileModal>
 
-              <div className="flex items-center shrink-0">
+              <div className="flex shrink-0 items-center">
                 <Tooltip label="Mute">
-                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded text-accent-gray hover:text-white hover:bg-white/[0.05]">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-accent-gray hover:bg-white/[0.05] hover:text-white">
                     <Mic size={16} />
                   </Button>
                 </Tooltip>
                 <Tooltip label="Deafen">
-                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded text-accent-gray hover:text-white hover:bg-white/[0.05]">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-accent-gray hover:bg-white/[0.05] hover:text-white">
                     <Headphones size={16} />
                   </Button>
                 </Tooltip>
                 <EditProfileModal>
                   <Tooltip label="User Settings">
-                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded text-accent-gray hover:text-white hover:bg-white/[0.05]">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-accent-gray hover:bg-white/[0.05] hover:text-white">
                       <Settings size={16} />
                     </Button>
                   </Tooltip>
                 </EditProfileModal>
                 <Tooltip label="Sign Out">
-                  <Button variant="ghost" size="icon" onClick={clearUser} className="w-8 h-8 rounded text-accent-gray hover:text-accent-red hover:bg-white/[0.05]">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={clearUser}
+                    className="h-8 w-8 rounded text-accent-gray hover:bg-white/[0.05] hover:text-accent-red"
+                  >
                     <LogOut size={16} />
                   </Button>
                 </Tooltip>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>

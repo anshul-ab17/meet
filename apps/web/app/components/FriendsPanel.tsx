@@ -132,7 +132,7 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-bg-base select-none">
       {/* Header */}
-      <div className="h-12 flex items-center justify-between px-4 border-b border-black/[0.2] shrink-0 shadow-sm bg-bg-base">
+      <div className="flex h-12 items-center justify-between border-b border-black/30 bg-[#0d0d0f] px-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-accent-gray">
             <Users size={20} className="shrink-0" />
@@ -144,8 +144,8 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
           <div className="flex gap-2">
             <button
               onClick={() => setTab("all")}
-              className={`px-2 py-1 rounded text-sm font-semibold transition-colors ${
-                tab === "all" ? "bg-white/[0.08] text-white" : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text"
+              className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors ${
+                tab === "all" ? "bg-[#f0b46a]/20 text-[#f3c98a]" : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text"
               }`}
             >
               All Friends ({friends.length})
@@ -153,13 +153,13 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
 
             <button
               onClick={() => setTab("pending")}
-              className={`px-2 py-1 rounded text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-                tab === "pending" ? "bg-white/[0.08] text-white" : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text"
+              className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+                tab === "pending" ? "bg-[#f0b46a]/20 text-[#f3c98a]" : "text-accent-gray hover:bg-white/[0.04] hover:text-accent-text"
               }`}
             >
               Pending
               {pendingIn.length > 0 && (
-                <span className="bg-accent-red text-white text-[10px] font-black rounded-full w-4.5 h-4.5 flex items-center justify-center">
+                <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-accent-red text-[10px] font-black text-white">
                   {pendingIn.length}
                 </span>
               )}
@@ -167,10 +167,8 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
 
             <button
               onClick={() => setTab("add")}
-              className={`px-2 py-1 rounded text-sm font-semibold transition-colors ${
-                tab === "add" 
-                  ? "bg-accent-green/20 text-accent-green font-bold" 
-                  : "text-accent-green bg-accent-green/10 hover:bg-accent-green/20"
+              className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors ${
+                tab === "add" ? "bg-[#f0b46a] text-black" : "bg-[#f0b46a]/15 text-[#f3c98a] hover:bg-[#f0b46a]/25"
               }`}
             >
               Add Friend
@@ -197,7 +195,7 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
                 {friends.map((friend) => (
                   <div
                     key={friend.id}
-                    className="flex items-center justify-between py-2 px-3 hover:bg-white/[0.04] rounded-md transition-colors group border-t border-white/[0.03] first:border-none"
+                    className="flex items-center justify-between rounded-xl px-3 py-2 transition-colors group border border-white/[0.04] hover:border-[#f0b46a]/20 hover:bg-[#f0b46a]/[0.05] first:border-none"
                   >
                     <div className="flex items-center gap-3">
                       <div className="relative">
@@ -247,7 +245,7 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
                   {pendingIn.map((req) => (
                     <div 
                       key={req.id} 
-                      className="flex items-center justify-between py-2 px-3 hover:bg-white/[0.04] rounded-md transition-colors border-t border-white/[0.03]"
+                      className="flex items-center justify-between rounded-xl px-3 py-2 transition-colors hover:bg-white/[0.04] border border-white/[0.04]"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar name={req.name} size="md" />
@@ -330,10 +328,10 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
               You can add friends with their Meet username.
             </p>
             
-            <form onSubmit={handleAddFriend} className="flex bg-bg-server border border-black/30 rounded-lg p-3 w-full focus-within:border-primary transition-colors relative">
+            <form onSubmit={handleAddFriend} className="flex w-full rounded-xl border border-black/30 bg-[#0d0d0f] p-3 focus-within:border-[#f0b46a] transition-colors relative">
               <input
                 placeholder="You can add friends with their Meet username"
-                className="bg-transparent text-white text-[15px] outline-none placeholder:text-accent-gray/40 w-full pr-24 font-normal"
+                className="w-full bg-transparent pr-24 font-normal text-[15px] text-white outline-none placeholder:text-accent-gray/40"
                 value={addName}
                 onChange={(e) => setAddName(e.target.value)}
                 autoFocus
@@ -341,7 +339,7 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
               <button 
                 type="submit"
                 disabled={addLoading || !addName.trim()}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary-hover disabled:bg-primary/40 disabled:text-[#ffffff]/30 text-white px-4 py-1.5 rounded text-sm font-semibold transition-colors shrink-0 flex items-center gap-1.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 shrink-0 rounded-full bg-[#f0b46a] px-4 py-1.5 text-sm font-bold text-black transition-colors hover:bg-[#f3c98a] disabled:bg-[#f0b46a]/40 disabled:text-black/30 flex items-center gap-1.5"
               >
                 <UserPlus size={14} />
                 Send Friend Request
