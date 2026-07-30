@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Globe, Hash, Compass, Plus, LogOut, ChevronDown, Users, Search, MessageSquare, Mic, Headphones, Settings } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useFriendStore } from "../store/useFriendStore";

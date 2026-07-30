@@ -5,7 +5,6 @@ import { UserPlus, MessageSquare, X, Check, Users } from "lucide-react";
 import { useFriendStore } from "../store/useFriendStore";
 import { useChatStore } from "../store/useChatStore";
 import { Avatar } from "./ui/avatar";
-import { Button } from "./ui/button";
 import { Tooltip } from "./ui/tooltip";
 import type { Friend, Room } from "../types";
 import { graphqlRequest } from "../lib/graphql";
@@ -122,8 +121,8 @@ export function FriendsPanel({ token, onOpenDM, onRefresh }: FriendsPanelProps) 
       setAddSuccess(`Success! Your friend request to ${addName.trim()} was sent.`);
       setAddName("");
       onRefresh();
-    } catch (err: any) {
-      setAddError(err.message ?? "Failed to send request");
+    } catch (err: unknown) {
+      setAddError(err instanceof Error ? err.message : "Failed to send request");
     } finally {
       setAddLoading(false);
     }
