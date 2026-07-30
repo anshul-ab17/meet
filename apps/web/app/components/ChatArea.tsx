@@ -1,10 +1,9 @@
 "use client";
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { UserPlus, Hash, Smile, Users, PlusCircle, Crown, PhoneOff, Video, Mic, ScreenShare, MonitorUp, Grid2x2, MoreVertical, Radio } from "lucide-react";
+import { UserPlus, Hash, Smile, Users, PlusCircle, PhoneOff, Video, Mic, ScreenShare, Grid2x2, MoreVertical, Radio } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useUserStore } from "../store/useUserStore";
-import { useFriendStore } from "../store/useFriendStore";
 import { Avatar } from "./ui/avatar";
 import { Tooltip } from "./ui/tooltip";
 import { UserProfileModal } from "./UserProfileModal";
@@ -45,7 +44,6 @@ export function ChatArea({ onSendMessage, onOpenDM }: ChatAreaProps) {
   const [input, setInput] = useState("");
   const [profileUser, setProfileUser] = useState<{ id: string; name: string } | null>(null);
   const [showMembers, setShowMembers] = useState(true);
-  const [streaming, setStreaming] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const user = useUserStore((s) => s.user);
@@ -53,7 +51,6 @@ export function ChatArea({ onSendMessage, onOpenDM }: ChatAreaProps) {
   const messages = useChatStore((s) => s.messages);
   const room = useChatStore((s) => s.currentRoom);
   const activeSection = useChatStore((s) => s.activeSection);
-  const friends = useFriendStore((s) => s.friends);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,7 +64,6 @@ export function ChatArea({ onSendMessage, onOpenDM }: ChatAreaProps) {
   };
 
   const isDM = activeSection === "dm";
-  const isGlobal = activeSection === "global";
   const isChannel = activeSection === "channel";
 
   if (!room) return null;
@@ -245,23 +241,17 @@ export function ChatArea({ onSendMessage, onOpenDM }: ChatAreaProps) {
         <div className="flex w-[340px] shrink-0 flex-col gap-3 overflow-y-auto border-l border-black/30 bg-[#0a0a0c] p-3 custom-scrollbar">
           {/* Main stream */}
           <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#1b2233] via-[#0e1320] to-[#2a2030]">
-            {streaming ? (
-              <>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(240,180,106,0.18),transparent_60%)]" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
-                  <Radio size={26} className="text-[#f0b46a]" />
-                  <div>
-                    <p className="text-sm font-semibold text-white">Richard Wilson started streaming</p>
-                    <p className="text-[12px] text-accent-gray">Elden Ring — shadow of the tree</p>
-                  </div>
-                  <button className="mt-1 rounded-full bg-[#f0b46a] px-6 py-1.5 text-sm font-bold text-black transition-transform hover:scale-105">
-                    Join
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-accent-gray">No active stream</div>
-            )}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(240,180,106,0.18),transparent_60%)]" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
+              <Radio size={26} className="text-[#f0b46a]" />
+              <div>
+                <p className="text-sm font-semibold text-white">Richard Wilson started streaming</p>
+                <p className="text-[12px] text-accent-gray">Elden Ring — shadow of the tree</p>
+              </div>
+              <button className="mt-1 rounded-full bg-[#f0b46a] px-6 py-1.5 text-sm font-bold text-black transition-transform hover:scale-105">
+                Join
+              </button>
+            </div>
           </div>
 
           {/* Participant grid */}
