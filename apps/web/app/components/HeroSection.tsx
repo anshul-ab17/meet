@@ -1,17 +1,17 @@
 "use client";
 
 
-import { MessageSquare, Send, Menu, X } from "lucide-react";
+import { Send, Menu, X, MessageSquare, Video, Sparkles, Users, Shield, Zap, ArrowRight, Radio } from "lucide-react";
 import { useState } from "react";
 import { AuthModal } from "./AuthModal";
 import { Button } from "./ui/button";
+import { BrandLogo } from "./BrandLogo";
 
 const MENU_LINKS = [
-  { label: "Home", href: "#" },
-  { label: "Services", href: "#" },
-  { label: "Work", href: "#" },
-  { label: "About", href: "#" },
-  { label: "Contact", href: "#" },
+  { label: "Features", href: "#features" },
+  { label: "Community", href: "#community" },
+  { label: "Security", href: "#security" },
+  { label: "Developers", href: "#developers" },
 ];
 
 const SOCIAL_LINKS = [
@@ -20,9 +20,11 @@ const SOCIAL_LINKS = [
   { label: "LinkedIn", href: "https://www.linkedin.com/in/anshul-bt17/", Glyph: LinkedinGlyph },
 ];
 
-const RESOURCE_LINKS = [
-  { label: "Weekstack App", href: "#" },
-  { label: "Newsletter", href: "#" },
+const FEATURE_TAGS = [
+  { icon: MessageSquare, label: "Real-time Chat", desc: "Instant sync & DMs" },
+  { icon: Video, label: "HD Stream & Calls", desc: "Crystal clear WebRTC" },
+  { icon: Users, label: "Channels & Spaces", desc: "Organized communities" },
+  { icon: Shield, label: "End-to-End Privacy", desc: "Protected conversations" },
 ];
 
 function Logo() {
@@ -32,12 +34,8 @@ function Logo() {
       className="group flex items-center gap-3 hover:opacity-90 transition-opacity"
       aria-label="Meet home"
     >
-      <span className="relative flex h-11 w-11 items-center justify-center">
-        <span className="absolute inset-0 rounded-full border border-white/40" />
-        <span className="absolute inset-[3px] rounded-full border border-white/15" />
-        <MessageSquare size={17} className="text-white/90" strokeWidth={2} />
-      </span>
-      <span className="text-white font-sans text-lg font-extrabold tracking-[0.18em]">MEET</span>
+      <BrandLogo size={40} className="rounded-xl shadow-lg shadow-[#f0b46a]/15" />
+      <span className="text-white font-sans text-xl font-extrabold tracking-[0.16em]">MEET</span>
     </button>
   );
 }
@@ -57,9 +55,9 @@ export function HeroSection() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-[#0a0e1a] text-white select-none">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0a0e1a] text-white select-none flex flex-col justify-between">
       {/* ===== Twilight scene (pure CSS / SVG, no external assets) ===== */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         {/* Sky gradient: starry indigo -> dusky teal -> warm amber on the horizon */}
         <div
           className="absolute inset-0"
@@ -74,24 +72,24 @@ export function HeroSection() {
 
         {/* Sun glow near horizon */}
         <div
-          className="absolute left-1/2 -translate-x-1/2 bottom-[8%] h-[42vh] w-[42vh] rounded-full blur-[10px]"
+          className="absolute left-1/2 -translate-x-1/2 bottom-[12%] h-[42vh] w-[42vh] rounded-full blur-[10px]"
           style={{
             background:
-              "radial-gradient(circle, rgba(255,210,140,0.95) 0%, rgba(245,170,110,0.55) 32%, rgba(220,130,90,0.18) 55%, transparent 72%)",
+              "radial-gradient(circle, rgba(255,210,140,0.85) 0%, rgba(245,170,110,0.45) 32%, rgba(220,130,90,0.15) 55%, transparent 72%)",
           }}
         />
 
-        {/* Volumetric clouds (amber-lit, soft) */}
-        <Cloud className="left-[4%] top-[20%] scale-[1.1] opacity-90" />
-        <Cloud className="right-[2%] top-[12%] scale-[1.35] opacity-80" />
-        <Cloud className="left-[28%] top-[30%] scale-[0.9] opacity-70" />
+        {/* Volumetric clouds */}
+        <Cloud className="left-[4%] top-[14%] scale-[1.1] opacity-75" />
+        <Cloud className="right-[2%] top-[8%] scale-[1.35] opacity-65" />
+        <Cloud className="left-[28%] top-[22%] scale-[0.9] opacity-55" />
 
         {/* Distant city skyline silhouette on the horizon */}
         <CitySkyline />
 
         {/* Rolling hills foreground */}
         <svg
-          className="absolute bottom-0 left-0 h-[42%] w-full"
+          className="absolute bottom-0 left-0 h-[38%] w-full"
           viewBox="0 0 1440 420"
           preserveAspectRatio="none"
           aria-hidden
@@ -100,39 +98,50 @@ export function HeroSection() {
           <path d="M0,420 L0,320 C200,260 360,360 560,310 C780,255 960,360 1180,305 C1320,267 1390,310 1440,290 L1440,420 Z" fill="#070b15" />
         </svg>
 
-        {/* Tiny figure sitting on the hill, facing the city */}
-        <div className="absolute left-[44%] bottom-[24%]">
-          <div className="relative h-5 w-5">
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-3.5 w-1.5 rounded-full bg-black/80" />
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-black/80" />
-          </div>
-          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-px w-6 bg-black/40 rounded-full" />
-        </div>
-
-        {/* Atmospheric haze + bottom darkening for text legibility */}
+        {/* Atmospheric haze + bottom darkening */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(120% 80% at 50% 100%, rgba(4,6,15,0.78) 0%, rgba(4,6,15,0.25) 42%, transparent 70%)",
+              "radial-gradient(120% 80% at 50% 100%, rgba(4,6,15,0.85) 0%, rgba(4,6,15,0.3) 50%, transparent 75%)",
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#04060f]/85 via-transparent to-[#04060f]/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#04060f]/90 via-transparent to-[#04060f]/40" />
       </div>
 
       {/* ===== Foreground UI ===== */}
-      <div className="relative z-10 flex h-full flex-col">
+      <div className="relative z-10 flex flex-col justify-between min-h-screen">
         {/* Top bar */}
-        <header className="flex items-center justify-between px-6 py-6 md:px-10 md:py-7">
+        <header className="flex items-center justify-between px-6 py-5 md:px-12 md:py-6 backdrop-blur-[2px]">
           <Logo />
 
+          <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-white/75">
+            {MENU_LINKS.map((link) => (
+              <a key={link.label} href={link.href} className="hover:text-white transition-colors duration-200">
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
           <div className="flex items-center gap-3">
-            <span className="hidden text-[12px] font-semibold uppercase tracking-[0.32em] text-white/85 md:inline">
-              Work fast. Live slow.
-            </span>
+            <AuthModal defaultMode="signin">
+              <button className="hidden sm:inline-flex px-4 py-2 text-[13px] font-semibold text-white/80 hover:text-white transition-colors">
+                Sign In
+              </button>
+            </AuthModal>
+
+            <AuthModal defaultMode="signup">
+              <Button
+                className="rounded-full bg-[#f0b46a] text-black hover:bg-[#f6c382] px-5 py-2 text-[13px] font-bold shadow-lg shadow-[#f0b46a]/20 transition-all hover:scale-105"
+              >
+                Get Started Free
+                <ArrowRight size={14} className="ml-1.5" />
+              </Button>
+            </AuthModal>
+
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white/90 transition-all hover:bg-white/10 md:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition-all hover:bg-white/10 md:hidden"
               aria-label="Menu"
             >
               {menuOpen ? <X size={18} /> : <Menu size={18} />}
@@ -140,105 +149,140 @@ export function HeroSection() {
           </div>
         </header>
 
-        {/* Center spacer — the giant wordmark sits at the very bottom */}
-        <div className="flex-1" />
-
-        {/* Bottom block: links + giant wordmark */}
-        <section className="relative px-6 pb-0 md:px-10">
-          {/* Three columns of links */}
-          <div className="mb-10 grid grid-cols-2 gap-10 md:grid-cols-3">
-            {/* MENU */}
-            <div>
-              <h3 className="mb-4 border-b border-white/20 pb-2 text-[11px] font-bold uppercase tracking-[0.28em] text-white">
-                Menu
-              </h3>
-              <ul className="flex flex-col gap-2.5">
-                {MENU_LINKS.map((l) => (
-                  <li key={l.label}>
-                    <ColumnLink {...l} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* SOCIALS */}
-            <div>
-              <h3 className="mb-4 border-b border-white/20 pb-2 text-[11px] font-bold uppercase tracking-[0.28em] text-white">
-                Socials
-              </h3>
-              <ul className="flex flex-col gap-2.5">
-                {SOCIAL_LINKS.map(({ label, href, Glyph }) => (
-                  <li key={label}>
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex w-fit items-center gap-2 text-white/70 text-[13px] font-light tracking-wide transition-all duration-300 hover:text-white hover:translate-x-0.5"
-                    >
-                      <Glyph className="h-[15px] w-[15px] text-white/55 group-hover:text-white" />
-                      {label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* RESOURCES */}
-            <div className="col-span-2 md:col-span-1">
-              <h3 className="mb-4 border-b border-white/20 pb-2 text-[11px] font-bold uppercase tracking-[0.28em] text-white">
-                Resources
-              </h3>
-              <ul className="mb-5 flex flex-col gap-2.5">
-                {RESOURCE_LINKS.map((l) => (
-                  <li key={l.label}>
-                    <ColumnLink {...l} />
-                  </li>
-                ))}
-              </ul>
-              <AuthModal defaultMode="signup">
-                <Button
-                  variant="outline"
-                  className="group rounded-full border-white/55 px-6 py-2.5 text-[13px] font-semibold text-white hover:bg-white/10 hover:border-white transition-all duration-300"
-                >
-                  Send a message
-                  <Send size={14} className="ml-2 opacity-70 group-hover:translate-x-0.5 transition-transform" />
-                </Button>
-              </AuthModal>
-            </div>
+        {/* Center Hero content: Headline, Live preview badges & stats */}
+        <main className="flex-1 flex flex-col items-center justify-center px-6 py-8 text-center max-w-5xl mx-auto w-full">
+          {/* Release badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-1.5 backdrop-blur-md mb-6 animate-fade-in shadow-inner">
+            <span className="flex h-2 w-2 rounded-full bg-[#f0b46a] animate-pulse" />
+            <span className="text-[12px] font-semibold uppercase tracking-wider text-white/90">
+              Meet v2.0 is Live
+            </span>
+            <span className="text-white/40">•</span>
+            <span className="text-[12px] text-white/70">Rooms, Voice & HD Streams</span>
           </div>
 
-          {/* Giant wordmark, clipped at the bottom edge */}
-          <div className="relative -mb-[3.5vw] mt-2 select-none">
+          {/* Main Headline */}
+          <h2 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.08]">
+            Where conversations <br className="hidden sm:inline" />
+            <span className="bg-gradient-to-r from-[#ffe4c2] via-[#f0b46a] to-[#d99a5b] bg-clip-text text-transparent">
+              come alive seamlessly.
+            </span>
+          </h2>
+
+          <p className="max-w-2xl text-base sm:text-lg text-white/70 font-light mb-8 leading-relaxed">
+            The next-generation chat platform engineered for speed, crystal-clear voice channels, and shared live streams with zero friction.
+          </p>
+
+          {/* Call to action buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+            <AuthModal defaultMode="signup">
+              <Button
+                size="lg"
+                className="rounded-full bg-gradient-to-r from-[#f0b46a] to-[#e59d4c] px-8 py-3 text-sm font-bold text-black shadow-xl shadow-[#f0b46a]/25 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-[#f0b46a]/35"
+              >
+                Launch Meet Now
+                <Zap size={16} className="ml-2 fill-black" />
+              </Button>
+            </AuthModal>
+
+            <AuthModal defaultMode="signin">
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-full border-white/25 bg-white/[0.05] px-7 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/15 hover:border-white/40"
+              >
+                Explore Channels
+                <MessageSquare size={16} className="ml-2 opacity-70" />
+              </Button>
+            </AuthModal>
+          </div>
+
+          {/* Feature Grid / Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 w-full max-w-4xl pt-2">
+            {FEATURE_TAGS.map(({ icon: Icon, label, desc }) => (
+              <div
+                key={label}
+                className="group flex flex-col items-start rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left backdrop-blur-md transition-all duration-300 hover:border-[#f0b46a]/40 hover:bg-white/[0.08] hover:-translate-y-0.5"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.08] text-[#f0b46a] mb-3 group-hover:bg-[#f0b46a] group-hover:text-black transition-colors">
+                  <Icon size={18} />
+                </div>
+                <h4 className="text-[13px] font-bold text-white mb-0.5">{label}</h4>
+                <p className="text-[11px] text-white/55 leading-tight">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </main>
+
+        {/* Bottom block: Footer links + giant brand wordmark */}
+        <section className="relative px-6 pt-4 pb-0 md:px-12">
+          {/* Giant wordmark */}
+          <div className="relative -mb-[3.5vw] select-none pointer-events-none opacity-90">
             <h1
-              className="whitespace-nowrap text-center font-sans font-extrabold leading-[0.78] tracking-[-0.03em] text-white"
-              style={{ fontSize: "min(27vw, 20rem)" }}
+              className="whitespace-nowrap text-center font-sans font-extrabold leading-[0.78] tracking-[-0.03em] text-white/90"
+              style={{ fontSize: "min(26vw, 19rem)" }}
             >
               MEET
             </h1>
           </div>
         </section>
+
+        {/* Footer band: emblem + tagline + copyright */}
+        <footer className="relative z-10 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 px-6 py-4 md:px-12 backdrop-blur-md bg-black/20">
+          <div className="flex items-center gap-3">
+            <BrandLogo size={26} className="opacity-90 rounded-lg" />
+            <span className="text-[11px] font-light uppercase tracking-[0.28em] text-white/60">
+              Connect, Chat, Collaborate
+            </span>
+          </div>
+
+          <div className="flex items-center gap-6">
+            {SOCIAL_LINKS.map(({ label, href, Glyph }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/50 hover:text-white transition-colors"
+                aria-label={label}
+              >
+                <Glyph className="h-4 w-4" />
+              </a>
+            ))}
+            <span className="text-[11px] font-light tracking-wide text-white/40 border-l border-white/15 pl-4">
+              © {new Date().getFullYear()} Meet
+            </span>
+          </div>
+        </footer>
       </div>
 
-      {/* Mobile overlay menu (reuses columns) */}
+      {/* Mobile overlay menu */}
       {menuOpen && (
-        <div className="absolute inset-0 z-30 flex flex-col bg-[#05060f]/95 backdrop-blur-xl md:hidden">
-          <div className="flex items-center justify-between px-6 py-6">
+        <div className="absolute inset-0 z-40 flex flex-col bg-[#05060f]/98 backdrop-blur-2xl md:hidden px-6 py-6">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <Logo />
             <button
               onClick={() => setMenuOpen(false)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20"
               aria-label="Close"
             >
               <X size={18} />
             </button>
           </div>
-          <nav className="flex flex-col gap-6 px-6 pt-6 text-2xl font-light">
+          <nav className="flex flex-col gap-5 pt-8 text-xl font-medium">
             {MENU_LINKS.map((l) => (
-              <a key={l.label} href={l.href} onClick={() => setMenuOpen(false)} className="text-white/85 hover:text-white">
+              <a key={l.label} href={l.href} onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-[#f0b46a] transition-colors">
                 {l.label}
               </a>
             ))}
           </nav>
+          <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-white/10">
+            <AuthModal defaultMode="signup">
+              <Button className="w-full rounded-full bg-[#f0b46a] text-black font-bold py-3">
+                Get Started
+              </Button>
+            </AuthModal>
+          </div>
         </div>
       )}
     </div>

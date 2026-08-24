@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, Hash, Compass, Plus, LogOut, ChevronDown, Users, Search, MessageSquare, Mic, Headphones, Settings } from "lucide-react";
+import { Globe, Hash, Compass, Plus, LogOut, ChevronDown, Users, Search, Mic, Headphones, Settings } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useFriendStore } from "../store/useFriendStore";
 import { useUserStore } from "../store/useUserStore";
@@ -9,6 +9,7 @@ import { Button } from "./ui/button";
 import { Tooltip } from "./ui/tooltip";
 import { CreateChannelModal } from "./CreateChannelModal";
 import { EditProfileModal } from "./EditProfileModal";
+import { BrandLogo } from "./BrandLogo";
 import type { Room } from "../types";
 
 interface SidebarProps {
@@ -68,10 +69,11 @@ export function Sidebar({ onCreateChannel, onOpenDM }: SidebarProps) {
     <div className="flex h-full shrink-0 font-sans select-none">
       {/* 1. Server rail (72px) — circular icon nav */}
       <div className="flex w-[72px] shrink-0 flex-col items-center gap-2 bg-[#0a0a0c] py-3">
-        <Tooltip label="Direct Messages">
+        {/* Brand emblem */}
+        <Tooltip label="Meet">
           <button onClick={handleHomeClick} className="group flex w-12 flex-col items-center gap-1 transition-all">
-            <span className={navIcon(isHome)}>
-              <MessageSquare size={18} />
+            <span className={`overflow-hidden rounded-xl ${isHome ? "ring-2 ring-[#f0b46a]" : "ring-1 ring-white/10"} transition-all`}>
+              <BrandLogo size={42} className="block" />
             </span>
           </button>
         </Tooltip>
